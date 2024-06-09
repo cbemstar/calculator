@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        .calculator-body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f3f3f3;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .calculator {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+            max-width: 90vw;
+        }
+
+        .display {
+            background-color: #f1f3f4;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: right;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #333;
+            height: 60px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .button {
+            background-color: #f1f3f4;
+            border: none;
+            border-radius: 5px;
+            padding: 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+
+        .button:active {
+            background-color: #ddd;
+        }
+
+        .operator {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+
+        .operator:active {
+            background-color: #2c6bc9;
+        }
+    </style>
+</head>
+<body class="calculator-body">
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="button" onclick="clearDisplay()">AC</button>
+            <button class="button" onclick="deleteDigit()">⌫</button>
+            <button class="button operator" onclick="appendOperator('/')">/</button>
+            <button class="button operator" onclick="appendOperator('*')">*</button>
+            <button class="button" onclick="appendDigit('7')">7</button>
+            <button class="button" onclick="appendDigit('8')">8</button>
+            <button class="button" onclick="appendDigit('9')">9</button>
+            <button class="button operator" onclick="appendOperator('-')">-</button>
+            <button class="button" onclick="appendDigit('4')">4</button>
+            <button class="button" onclick="appendDigit('5')">5</button>
+            <button class="button" onclick="appendDigit('6')">6</button>
+            <button class="button operator" onclick="appendOperator('+')">+</button>
+            <button class="button" onclick="appendDigit('1')">1</button>
+            <button class="button" onclick="appendDigit('2')">2</button>
+            <button class="button" onclick="appendDigit('3')">3</button>
+            <button class="button operator" onclick="calculate()">=</button>
+            <button class="button" onclick="appendDigit('0')" style="grid-column: span 2;">0</button>
+            <button class="button" onclick="appendDecimal()">.</button>
+        </div>
+    </div>
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let memory = 0;
+        let operator = null;
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            memory = 0;
+            operator = null;
+            updateDisplay();
+        }
+
+        function deleteDigit() {
+            currentInput = currentInput.slice(0, -1) || '0';
+            updateDisplay();
+        }
+
+        function appendDigit(digit) {
+            if (currentInput === '0') {
+                currentInput = digit;
+            } else {
+                currentInput += digit;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== null) {
+                calculate();
+            }
+            memory = parseFloat(currentInput);
+            operator = op;
+            currentInput = '0';
+        }
+
+        function appendDecimal() {
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            let result;
+            switch (operator) {
+                case '+':
+                    result = memory + parseFloat(currentInput);
+                    break;
+                case '-':
+                    result = memory - parseFloat(currentInput);
+                    break;
+                case '*':
+                    result = memory * parseFloat(currentInput);
+                    break;
+                case '/':
+                    result = memory / parseFloat(currentInput);
+                    break;
+                default:
+                    return;
+            }
+            currentInput = result.toString();
+            operator = null;
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
