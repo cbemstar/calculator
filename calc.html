@@ -1,4 +1,4 @@
-t<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -9,11 +9,11 @@ t<!DOCTYPE html>
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
+            height: 100vh; /* Ensure it takes full height of the viewport */
             background-color: #fff;
             margin: 0;
             font-family: Arial, sans-serif;
-            padding-top: 50px;
+            padding: 0; /* Remove padding to avoid extra space */
         }
 
         .calculator {
@@ -23,8 +23,6 @@ t<!DOCTYPE html>
             padding: 20px;
             max-width: 400px;
             width: 90%;
-            height: 100%;
-            padding-top: 50px;
         }
 
         .display {
@@ -185,4 +183,3 @@ t<!DOCTYPE html>
     </script>
 </body>
 </html>
-
