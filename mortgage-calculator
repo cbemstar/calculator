@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="mortgage-calculator">
+        <h1>Mortgage Calculator</h1>
+        <form id="mortgageForm">
+            <label for="homePrice">Home Price:</label>
+            <input type="text" id="homePrice" required oninput="formatNumber(this)">
+
+            <label for="downPayment">Down Payment:</label>
+            <input type="text" id="downPayment" required oninput="formatNumber(this)">
+
+            <label for="loanAmount">Loan Amount:</label>
+            <input type="text" id="loanAmount" required oninput="formatNumber(this)">
+
+            <label for="interestRate">Interest Rate (%):</label>
+            <input type="text" id="interestRate" required>
+
+            <label for="loanTerm">Loan Term (years):</label>
+            <input type="text" id="loanTerm" required>
+
+            <label for="startDate">Start Date:</label>
+            <input type="month" id="startDate" required>
+
+            <label for="propertyTax">Property Tax (annual):</label>
+            <input type="text" id="propertyTax" required oninput="formatNumber(this)">
+
+            <label for="propertyInsurance">Property Insurance (annual):</label>
+            <input type="text" id="propertyInsurance" required oninput="formatNumber(this)">
+
+            <label for="extraMonthlyPayments">Extra Monthly Payments:</label>
+            <input type="text" id="extraMonthlyPayments" required oninput="formatNumber(this)">
+
+            <label for="monthlyIncome">Monthly Income:</label>
+            <input type="text" id="monthlyIncome" required oninput="formatNumber(this)">
+
+            <button type="submit">Calculate</button>
+        </form>
+
+        <div class="results">
+            <p>Monthly Payment: $<span id="monthlyPayment">0.00</span></p>
+            <p>Affordability Ratio: <span id="affordabilityRatio">0.00</span>%</p>
+        </div>
+
+        <h2>Amortization Schedule</h2>
+        <table id="amortizationSchedule">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Principal</th>
+                    <th>Interest</th>
+                    <th>Total Payment</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Schedule rows will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+
+        <canvas id="mortgagePieChart" width="400" height="400"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
