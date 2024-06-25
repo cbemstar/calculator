@@ -6,14 +6,27 @@
     <title>Enhanced Mortgage Calculator with Pie Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .calc-container {
-            max-width: 600px;
-            margin: auto;
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .calc-container, .embed-container {
+            flex: 1;
+            min-width: 300px;
+            margin: 10px;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            height: 100%;
+        }
+        .embed-container {
+            max-width: 300px;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
         }
         .calc-input {
             width: 100%;
@@ -23,7 +36,7 @@
             border-radius: 5px;
         }
         .calc-button {
-            background-color: #28a745;
+            background-color: #000;
             color: white;
             border: none;
             padding: 10px;
@@ -33,7 +46,7 @@
             transition: background-color 0.3s ease;
         }
         .calc-button:hover {
-            background-color: #218838;
+            background-color: #333;
         }
         .calc-result {
             margin-top: 20px;
@@ -42,45 +55,86 @@
         .calc-container h1 {
             font-size: 1.5rem;
         }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
 <body>
-    <div class="calc-container">
-        <h1>Mortgage Calculator</h1>
-        <form id="mortgageCalcForm" onsubmit="calculateMortgage(event)">
-            <label for="homePrice">Home Price:</label>
-            <input type="text" id="homePrice" class="calc-input" required oninput="formatNumber(this)">
-            <label for="downPayment">Down Payment:</label>
-            <input type="text" id="downPayment" class="calc-input" required oninput="formatNumber(this)">
-            <label for="loanAmount">Loan Amount:</label>
-            <input type="text" id="loanAmount" class="calc-input" required oninput="formatNumber(this)">
-            <label for="interestRate">Interest Rate (%):</label>
-            <input type="text" id="interestRate" class="calc-input" required>
-            <label for="loanTerm">Loan Term (years):</label>
-            <input type="text" id="loanTerm" class="calc-input" required>
-            <label for="startDate">Start Date:</label>
-            <input type="month" id="startDate" class="calc-input" required>
-            <label for="propertyTax">Property Tax (annual):</label>
-            <input type="text" id="propertyTax" class="calc-input" required oninput="formatNumber(this)">
-            <label for="propertyInsurance">Property Insurance (annual):</label>
-            <input type="text" id="propertyInsurance" class="calc-input" required oninput="formatNumber(this)">
-            <label for="extraMonthlyPayments">Extra Monthly Payments:</label>
-            <input type="text" id="extraMonthlyPayments" class="calc-input" required oninput="formatNumber(this)">
-            <label for="monthlyIncome">Monthly Income:</label>
-            <input type="text" id="monthlyIncome" class="calc-input" required oninput="formatNumber(this)">
-            <button type="submit" class="calc-button">Calculate</button>
-        </form>
-        <div class="calc-result" id="result">
-            Monthly Payment: $<span id="monthlyPayment"></span><br>
-            Affordability Ratio: <span id="affordabilityRatio"></span>%
+    <div class="main-container">
+        <div class="embed-container">
+            <h2>Embed Mortgage Calculator</h2>
+            <div id="embedCode">&lt;iframe src="https://cbemstar.github.io/calculator/mortgage-calc.html" width="100%" height="1400" frameborder="0"&gt;&lt;/iframe&gt;</div>
+            <button onclick="copyEmbedCode()">Copy</button>
         </div>
-        <canvas id="mortgagePieChart" width="400" height="400"></canvas>
+        <div class="calc-container">
+            <h1>Mortgage Calculator</h1>
+            <form id="mortgageCalcForm" onsubmit="calculateMortgage(event)">
+                <label for="homePrice">Home Price:</label>
+                <input type="text" id="homePrice" class="calc-input" required oninput="formatNumber(this)">
+                <label for="downPayment">Down Payment:</label>
+                <input type="text" id="downPayment" class="calc-input" required oninput="formatNumber(this)">
+                <label for="loanAmount">Loan Amount:</label>
+                <input type="text" id="loanAmount" class="calc-input" required oninput="formatNumber(this)">
+                <label for="interestRate">Interest Rate (%):</label>
+                <input type="text" id="interestRate" class="calc-input" required>
+                <label for="loanTerm">Loan Term (years):</label>
+                <input type="text" id="loanTerm" class="calc-input" required>
+                <label for="startDate">Start Date:</label>
+                <input type="month" id="startDate" class="calc-input" required>
+                <label for="propertyTax">Property Tax (annual):</label>
+                <input type="text" id="propertyTax" class="calc-input" required oninput="formatNumber(this)">
+                <label for="propertyInsurance">Property Insurance (annual):</label>
+                <input type="text" id="propertyInsurance" class="calc-input" required oninput="formatNumber(this)">
+                <label for="extraMonthlyPayments">Extra Monthly Payments:</label>
+                <input type="text" id="extraMonthlyPayments" class="calc-input" required oninput="formatNumber(this)">
+                <label for="monthlyIncome">Monthly Income:</label>
+                <input type="text" id="monthlyIncome" class="calc-input" required oninput="formatNumber(this)">
+                <button type="submit" class="calc-button">Calculate</button>
+            </form>
+            <div class="calc-result" id="result">
+                Monthly Payment: $<span id="monthlyPayment"></span><br>
+                Affordability Ratio: <span id="affordabilityRatio"></span>%
+            </div>
+            <canvas id="mortgagePieChart" width="400" height="400"></canvas>
+        </div>
     </div>
+
+    <div id="toast" class="toast">Embed code copied to clipboard!</div>
 
     <script>
         function formatNumber(input) {
             const value = input.value.replace(/\D/g, '');
             input.value = Number(value).toLocaleString();
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embedCode').innerText;
+            navigator.clipboard.writeText(embedCode).then(function() {
+                showToast();
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.style.visibility = 'visible';
+            setTimeout(function() { toast.style.visibility = 'hidden'; }, 3000);
         }
 
         function calculateMortgage(event) {
