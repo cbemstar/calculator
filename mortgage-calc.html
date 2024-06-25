@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Mortgage Calculator with Amortization Schedule and Pie Chart</title>
+    <title>Enhanced Mortgage Calculator with Pie Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .calc-container {
@@ -39,21 +39,8 @@
             margin-top: 20px;
             font-weight: bold;
         }
-        .amortization-schedule {
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .amortization-schedule th, .amortization-schedule td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        .amortization-schedule th {
-            background-color: #f2f2f2;
-            text-align: center;
-        }
         .calc-container h1 {
-            font-size: 2.5em;
+            font-size: 1.5rem;
         }
     </style>
 </head>
@@ -88,18 +75,6 @@
             Affordability Ratio: <span id="affordabilityRatio"></span>%
         </div>
         <canvas id="mortgagePieChart" width="400" height="400"></canvas>
-        <table class="amortization-schedule" id="amortizationSchedule">
-            <thead>
-                <tr>
-                    <th>Month</th>
-                    <th>Principal</th>
-                    <th>Interest</th>
-                    <th>Total Payment</th>
-                    <th>Balance</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
     </div>
 
     <script>
@@ -133,45 +108,7 @@
             document.getElementById('monthlyPayment').textContent = monthlyPayment.toFixed(2);
             document.getElementById('affordabilityRatio').textContent = affordabilityRatio.toFixed(2);
 
-            const schedule = calculateAmortizationSchedule(loanAmount, interestRate, loanTerm, principalAndInterest, propertyTax, propertyInsurance, extraMonthlyPayments);
-            displayAmortizationSchedule(schedule);
             displayPieChart(monthlyPayment, propertyTax, propertyInsurance, principalAndInterest);
-        }
-
-        function calculateAmortizationSchedule(loanAmount, interestRate, loanTerm, principalAndInterest, propertyTax, propertyInsurance, extraMonthlyPayments) {
-            let balance = loanAmount;
-            const schedule = [];
-
-            for (let month = 1; month <= loanTerm; month++) {
-                const interestPayment = balance * interestRate;
-                const principalPayment = principalAndInterest - interestPayment;
-                balance -= principalPayment;
-                schedule.push({
-                    month: month,
-                    principal: principalPayment.toFixed(2),
-                    interest: interestPayment.toFixed(2),
-                    totalPayment: (principalPayment + interestPayment + propertyTax + propertyInsurance + extraMonthlyPayments).toFixed(2),
-                    balance: balance.toFixed(2)
-                });
-            }
-            return schedule;
-        }
-
-        function displayAmortizationSchedule(schedule) {
-            const tbody = document.querySelector('#amortizationSchedule tbody');
-            tbody.innerHTML = '';
-
-            schedule.forEach(payment => {
-                const row = document.createElement('tr');
-                row.innerHTML = 
-                    <td>${payment.month}</td>
-                    <td>${payment.principal}</td>
-                    <td>${payment.interest}</td>
-                    <td>${payment.totalPayment}</td>
-                    <td>${payment.balance}</td>
-                ;
-                tbody.appendChild(row);
-            });
         }
 
         function displayPieChart(monthlyPayment, propertyTax, propertyInsurance, principalAndInterest) {
