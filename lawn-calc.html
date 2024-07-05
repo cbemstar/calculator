@@ -11,13 +11,12 @@
             gap: 20px;
             flex-wrap: wrap;
         }
-        .calc-container, .embed-container {
+        .calc-container, .embed-container, .results-container {
             flex: 1;
             min-width: 300px;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 10px;
-           
             margin: 10px;
         }
         .calc-container {
@@ -26,11 +25,16 @@
         .embed-container {
             order: 1;
         }
+        .results-container {
+            order: 3;
+            background-color: #f9f9f9;
+        }
         .calc-input {
             width: 100%;
             padding: 10px;
             margin: 5px 0 15px;
-            
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         .calc-button {
             background-color: #000;
@@ -86,6 +90,14 @@
             width: 100%;
             margin-bottom: 15px;
         }
+        .results-container h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .calculation-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -93,7 +105,7 @@
         <div class="embed-container">
             <h2>Embed Lawn Area Calculator</h2>
             <textarea readonly>
-<iframe src="https://cbemstar.github.io/calculator/lawn-calc.html" width="100%" height="100%" frameborder="0"></iframe>
+<iframe src="https://cbemstar.github.io/calculator/lawn-calc.html" width="100%" height="600" frameborder="0"></iframe>
             </textarea>
             <button class="copy-button" onclick="copyEmbedCode()">Copy</button>
         </div>
@@ -144,112 +156,151 @@
                 <p>Lawn Area: <span id="lawnArea">0.00</span> square units</p>
             </div>
         </div>
+        <div class="results-container" id="resultsContainer">
+            <h2>Your Calculations</h2>
+        </div>
     </div>
 
     <script>
-        function formatNumber(input) {
-            const value = input.value.replace(/\D/g, '');
-            input.value = Number(value).toLocaleString();
-        }
-
-        function resetForm() {
-            document.getElementById('lawnAreaForm').reset();
-            document.getElementById('result').style.display = 'none';
-            updateForm();
-        }
-
-        function updateForm() {
-            const shape = document.getElementById('shape').value;
-            document.querySelectorAll('.shape-fields').forEach(field => field.style.display = 'none');
-            document.getElementById(`${shape}Fields`).style.display = 'block';
-            updateShapeImage(shape);
-        }
-
-        function updateShapeImage(shape) {
-            const shapeImage = document.getElementById('shapeImage');
-            let imageUrl = '';
-            switch (shape) {
-                case 'rectangle':
-                    imageUrl = 'https://newtonsbuilding.com.au/wp-content/uploads/2023/03/download.png';
-                    break;
-                case 'circle':
-                    imageUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0dhhwrZ9EzekeSjKsJiDPg19Nsw8FAa7u4w&s';
-                    break;
-                case 'triangle':
-                    imageUrl = 'https://www.wikihow.com/images/thumb/4/43/Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg/v4-460px-Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg.webp';
-                    break;
-                case 'polygon':
-                    imageUrl = 'https://mathmonks.com/wp-content/uploads/2020/11/Area-of-Regular-Polygon.jpg';
-                    break;
+        document.addEventListener('DOMContentLoaded', function() {
+            function formatNumber(input) {
+                const value = input.value.replace(/\D/g, '');
+                input.value = Number(value).toLocaleString();
             }
-            shapeImage.src = imageUrl;
-            shapeImage.style.display = imageUrl ? 'block' : 'none';
-        }
 
-        function addPolygonSides() {
-            const sidesContainer = document.getElementById('polygonSidesContainer');
-            sidesContainer.innerHTML = '';
-            const sides = parseInt(document.getElementById('sides').value) || 0;
-            for (let i = 1; i <= sides; i++) {
-                const label = document.createElement('label');
-                label.setAttribute('for', `side${i}`);
-                label.textContent = `Length of side ${i}:`;
-                sidesContainer.appendChild(label);
-
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.id = `side${i}`;
-                input.className = 'calc-input';
-                input.oninput = () => formatNumber(input);
-                sidesContainer.appendChild(input);
+            function resetForm() {
+                document.getElementById('lawnAreaForm').reset();
+                document.getElementById('result').style.display = 'none';
+                updateForm();
             }
-        }
 
-        function calculateLawnArea(event) {
-            event.preventDefault();
-            const shape = document.getElementById('shape').value;
-            let area = 0;
+            function updateForm() {
+                const shape = document.getElementById('shape').value;
+                document.querySelectorAll('.shape-fields').forEach(field => field.style.display = 'none');
+                document.getElementById(`${shape}Fields`).style.display = 'block';
+                updateShapeImage(shape);
+            }
 
-            if (shape === 'rectangle') {
-                const length = parseFloat(document.getElementById('length').value.replace(/,/g, '')) || 0;
-                const width = parseFloat(document.getElementById('width').value.replace(/,/g, '')) || 0;
-                area = length * width;
-            } else if (shape === 'circle') {
-                const radius = parseFloat(document.getElementById('radius').value.replace(/,/g, '')) || 0;
-                area = Math.PI * Math.pow(radius, 2);
-            } else if (shape === 'triangle') {
-                const base = parseFloat(document.getElementById('base').value.replace(/,/g, '')) || 0;
-                const height = parseFloat(document.getElementById('height').value.replace(/,/g, '')) || 0;
-                area = 0.5 * base * height;
-            } else if (shape === 'polygon') {
+            function updateShapeImage(shape) {
+                const shapeImage = document.getElementById('shapeImage');
+                let imageUrl = '';
+                switch (shape) {
+                    case 'rectangle':
+                        imageUrl = 'https://newtonsbuilding.com.au/wp-content/uploads/2023/03/download.png';
+                        break;
+                    case 'circle':
+                        imageUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0dhhwrZ9EzekeSjKsJiDPg19Nsw8FAa7u4w&s';
+                        break;
+                    case 'triangle':
+                        imageUrl = 'https://www.wikihow.com/images/thumb/4/43/Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg/v4-460px-Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg.webp';
+                        break;
+                    case 'polygon':
+                        imageUrl = 'https://mathmonks.com/wp-content/uploads/2020/11/Area-of-Regular-Polygon.jpg';
+                        break;
+                }
+                shapeImage.src = imageUrl;
+                shapeImage.style.display = imageUrl ? 'block' : 'none';
+            }
+
+            function addPolygonSides() {
+                const sidesContainer = document.getElementById('polygonSidesContainer');
+                sidesContainer.innerHTML = '';
                 const sides = parseInt(document.getElementById('sides').value) || 0;
-                let perimeter = 0;
-
                 for (let i = 1; i <= sides; i++) {
-                    const sideLength =
-                        parseFloat(document.getElementById(`side${i}`).value.replace(/,/g, '')) || 0;
-                    perimeter += sideLength;
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `side${i}`);
+                    label.textContent = `Length of side ${i}:`;
+                    sidesContainer.appendChild(label);
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `side${i}`;
+                    input.className = 'calc-input';
+                    input.oninput = () => formatNumber(input);
+                    sidesContainer.appendChild(input);
+                }
+            }
+
+            function calculateLawnArea(event) {
+                event.preventDefault();
+                const shape = document.getElementById('shape').value;
+                let area = 0;
+
+                if (shape === 'rectangle') {
+                    const length = parseFloat(document.getElementById('length').value.replace(/,/g, '')) || 0;
+                    const width = parseFloat(document.getElementById('width').value.replace(/,/g, '')) || 0;
+                    area = length * width;
+                } else if (shape === 'circle') {
+                    const radius = parseFloat(document.getElementById('radius').value.replace(/,/g, '')) || 0;
+                    area = Math.PI * Math.pow(radius, 2);
+                                    } else if (shape === 'triangle') {
+                    const base = parseFloat(document.getElementById('base').value.replace(/,/g, '')) || 0;
+                    const height = parseFloat(document.getElementById('height').value.replace(/,/g, '')) || 0;
+                    area = 0.5 * base * height;
+                } else if (shape === 'polygon') {
+                    const sides = parseInt(document.getElementById('sides').value) || 0;
+                    let perimeter = 0;
+                    let sideLength = 0;
+
+                    for (let i = 1; i <= sides; i++) {
+                        sideLength = parseFloat(document.getElementById(`side${i}`).value.replace(/,/g, '')) || 0;
+                        perimeter += sideLength;
+                    }
+
+                    const apothem = (sideLength / (2 * Math.tan(Math.PI / sides))) || 0;
+                    area = (perimeter * apothem) / 2;
                 }
 
-                const apothem = (sideLength / (2 * Math.tan(Math.PI / sides))) || 0;
-                area = (perimeter * apothem) / 2;
+                document.getElementById('lawnArea').textContent = area.toFixed(2);
+                document.getElementById('result').style.display = 'block';
+                addCalculationToList(shape, area);
             }
 
-            document.getElementById('lawnArea').textContent = area.toFixed(2);
-            document.getElementById('result').style.display = 'block';
-        }
+            function addCalculationToList(shape, area) {
+                const resultsContainer = document.getElementById('resultsContainer');
+                const calculationItem = document.createElement('div');
+                calculationItem.className = 'calculation-item';
+                calculationItem.innerHTML = `<p>${shape.charAt(0).toUpperCase() + shape.slice(1)}: ${area.toFixed(2)} square units</p>`;
+                resultsContainer.appendChild(calculationItem);
+                updateSummary();
+            }
 
-        function copyEmbedCode() {
-            const embedCode = document.querySelector('.embed-container textarea');
-            embedCode.select();
-            embedCode.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand('copy');
+            function updateSummary() {
+                const resultsContainer = document.getElementById('resultsContainer');
+                const calculations = resultsContainer.getElementsByClassName('calculation-item');
+                if (calculations.length > 1) {
+                    let sum = 0;
+                    for (let item of calculations) {
+                        const value = parseFloat(item.innerText.split(': ')[1].split(' ')[0]);
+                        sum += value;
+                    }
 
-            alert('Embed code copied to clipboard!');
-        }
+                    let summary = document.getElementById('calculation-summary');
+                    if (!summary) {
+                        summary = document.createElement('div');
+                        summary.id = 'calculation-summary';
+                        summary.className = 'calc-result';
+                        summary.innerHTML = `<p>Total Area of All Shapes: <span id="totalArea">${sum.toFixed(2)}</span> square units</p>`;
+                        resultsContainer.appendChild(summary);
+                    } else {
+                        document.getElementById('totalArea').innerText = sum.toFixed(2);
+                    }
+                }
+            }
 
-        // Initialize form
-        updateForm();
+            function copyEmbedCode() {
+                const embedCode = document.querySelector('.embed-container textarea');
+                embedCode.select();
+                embedCode.setSelectionRange(0, 99999); // For mobile devices
+                document.execCommand('copy');
+
+                alert('Embed code copied to clipboard!');
+            }
+
+            // Initialize form
+            updateForm();
+        });
     </script>
 </body>
 </html>
+
