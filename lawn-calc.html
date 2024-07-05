@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lawn Area Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .calc-container, .embed-container {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
+        .calc-container {
+            order: 2;
+        }
+        .embed-container {
+            order: 1;
+        }
+        .calc-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .calc-button {
+            background-color: #000;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 48%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px 1%;
+        }
+        .calc-button:hover {
+            background-color: #444;
+        }
+        .calc-result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .calc-container h1 {
+            font-size: 1.5rem;
+        }
+        .embed-container textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+        .copy-button {
+            background-color: #000;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        .copy-button:hover {
+            background-color: #444;
+        }
+        @media (max-width: 991px) {
+            .calc-container {
+                order: 2;
+            }
+            .embed-container {
+                order: 1;
+            }
+        }
+        .shape-image {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="embed-container">
+            <h2>Embed Lawn Area Calculator</h2>
+            <textarea readonly>
+<iframe src="https://sample.com/lawn-area-calculator.html" width="100%" height="600" frameborder="0"></iframe>
+            </textarea>
+            <button class="copy-button" onclick="copyEmbedCode()">Copy</button>
+        </div>
+        <div class="calc-container">
+            <h1>Lawn Area Calculator</h1>
+            <form id="lawnAreaForm" onsubmit="calculateLawnArea(event)">
+                <label for="shape">Select Shape:</label>
+                <select id="shape" class="calc-input" required onchange="updateForm()">
+                    <option value="rectangle">Rectangle</option>
+                    <option value="circle">Circle</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="polygon">Polygon</option>
+                </select>
+                
+                <img id="shapeImage" class="shape-image" src="" alt="Shape Image" style="display:none;">
+                
+                <div id="rectangleFields" class="shape-fields">
+                    <label for="length">Length:</label>
+                    <input type="text" id="length" class="calc-input" oninput="formatNumber(this)">
+                    <label for="width">Width:</label>
+                    <input type="text" id="width" class="calc-input" oninput="formatNumber(this)">
+                </div>
+
+                <div id="circleFields" class="shape-fields" style="display:none;">
+                    <label for="radius">Radius:</label>
+                    <input type="text" id="radius" class="calc-input" oninput="formatNumber(this)">
+                </div>
+
+                <div id="triangleFields" class="shape-fields" style="display:none;">
+                    <label for="base">Base:</label>
+                    <input type="text" id="base" class="calc-input" oninput="formatNumber(this)">
+                    <label for="height">Height:</label>
+                    <input type="text" id="height" class="calc-input" oninput="formatNumber(this)">
+                </div>
+
+                <div id="polygonFields" class="shape-fields" style="display:none;">
+                    <label for="sides">Number of Sides:</label>
+                    <input type="text" id="sides" class="calc-input" oninput="formatNumber(this)" onchange="addPolygonSides()">
+                    <div id="polygonSidesContainer"></div>
+                </div>
+
+                <div>
+                    <button type="button" class="calc-button" onclick="resetForm()">Reset</button>
+                    <button type="submit" class="calc-button">Calculate</button>
+                </div>
+            </form>
+            <div class="calc-result" id="result" style="display:none;">
+                <p>Lawn Area: <span id="lawnArea">0.00</span> square units</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(input) {
+            const value = input.value.replace(/\D/g, '');
+            input.value = Number(value).toLocaleString();
+        }
+
+        function resetForm() {
+            document.getElementById('lawnAreaForm').reset();
+            document.getElementById('result').style.display = 'none';
+            updateForm();
+        }
+
+        function updateForm() {
+            const shape = document.getElementById('shape').value;
+            document.querySelectorAll('.shape-fields').forEach(field => field.style.display = 'none');
+            document.getElementById(`${shape}Fields`).style.display = 'block';
+            updateShapeImage(shape);
+        }
+
+        function updateShapeImage(shape) {
+            const shapeImage = document.getElementById('shapeImage');
+            let imageUrl = '';
+            switch (shape) {
+                case 'rectangle':
+                    imageUrl = 'https://newtonsbuilding.com.au/wp-content/uploads/2023/03/download.png';
+                    break;
+                case 'circle':
+                    imageUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0dhhwrZ9EzekeSjKsJiDPg19Nsw8FAa7u4w&s';
+                    break;
+                case 'triangle':
+                    imageUrl = 'https://www.wikihow.com/images/thumb/4/43/Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg/v4-460px-Calculate-the-Area-of-a-Triangle-Step-1-Version-5.jpg.webp';
+                    break;
+                case 'polygon':
+                    imageUrl = 'https://mathmonks.com/wp-content/uploads/2020/11/Area-of-Regular-Polygon.jpg';
+                    break;
+            }
+            shapeImage.src = imageUrl;
+            shapeImage.style.display = imageUrl ? 'block' : 'none';
+        }
+
+        function addPolygonSides() {
+            const sidesContainer = document.getElementById('polygonSidesContainer');
+            sidesContainer.innerHTML = '';
+            const sides = parseInt(document.getElementById('sides').value) || 0;
+            for (let i = 1; i <= sides; i++) {
+                const label = document.createElement('label');
+                label.setAttribute('for', `side${i}`);
+                label.textContent = `Length of side ${i}:`;
+                sidesContainer.appendChild(label);
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `side${i}`;
+                input.className = 'calc-input';
+                input.oninput = () => formatNumber(input);
+                sidesContainer.appendChild(input);
+            }
+        }
+
+        function calculateLawnArea(event) {
+            event.preventDefault();
+            const shape = document.getElementById('shape').value;
+            let area = 0;
+
+            if (shape === 'rectangle') {
+                const length = parseFloat(document.getElementById('length').value.replace(/,/g, '')) || 0;
+                const width = parseFloat(document.getElementById('width').value.replace(/,/g, '')) || 0;
+                area = length * width;
+            } else if (shape === 'circle') {
+                const radius = parseFloat(document.getElementById('radius').value.replace(/,/g, '')) || 0;
+                area = Math.PI * Math.pow(radius, 2);
+            } else if (shape === 'triangle') {
+                const base = parseFloat(document.getElementById('base').value.replace(/,/g, '')) || 0;
+                const height = parseFloat(document.getElementById('height').value.replace(/,/g, '')) || 0;
+                area = 0.5 * base * height;
+            } else if (shape === 'polygon') {
+                const sides = parseInt(document.getElementById('sides').value) || 0;
+                let perimeter = 0;
+
+                for (let i = 1; i <= sides; i++) {
+                    const sideLength =
+                        parseFloat(document.getElementById(`side${i}`).value.replace(/,/g, '')) || 0;
+                    perimeter += sideLength;
+                }
+
+                const apothem = (sideLength / (2 * Math.tan(Math.PI / sides))) || 0;
+                area = (perimeter * apothem) / 2;
+            }
+
+            document.getElementById('lawnArea').textContent = area.toFixed(2);
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.querySelector('.embed-container textarea');
+            embedCode.select();
+            embedCode.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+
+            alert('Embed code copied to clipboard!');
+        }
+
+        // Initialize form
+        updateForm();
+    </script>
+</body>
+</html>
