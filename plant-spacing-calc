@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Spacing Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label, input, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        input {
+            padding: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Plant Spacing Calculator</h2>
+            <form id="plantSpacingForm" onsubmit="calculatePlantSpacing(event)">
+                <label for="areaLength">Area Length (ft):</label>
+                <input type="number" id="areaLength" class="calc-input" required>
+                <label for="areaWidth">Area Width (ft):</label>
+                <input type="number" id="areaWidth" class="calc-input" required>
+                <label for="plantSpacing">Plant Spacing (inches):</label>
+                <input type="number" id="plantSpacing" class="calc-input" required>
+                <div>
+                    <button type="submit" class="calc-button">Calculate</button>
+                    <button type="reset" class="calc-button" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+            <div id="result" style="display:none;">Number of Plants: <span id="numberOfPlants">0</span></div>
+        </div>
+        <div class="column">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly><iframe src="https://example.com/plant-spacing-calculator.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button id="copy-btn" onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function resetForm() {
+                document.getElementById('plantSpacingForm').reset();
+                document.getElementById('numberOfPlants').textContent = '0';
+                document.getElementById('result').style.display = 'none';
+            }
+
+            function calculatePlantSpacing(event) {
+                event.preventDefault();
+                const length = parseFloat(document.getElementById('areaLength').value) || 0;
+                const width = parseFloat(document.getElementById('areaWidth').value) || 0;
+                const spacing = parseFloat(document.getElementById('plantSpacing').value) || 0;
+
+                if (length === 0 || width === 0 || spacing === 0) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+
+                const area = length * width;
+                const spacingInFeet = spacing / 12;
+                const numberOfPlants = Math.floor(area / (spacingInFeet * spacingInFeet));
+
+                document.getElementById('numberOfPlants').textContent = numberOfPlants;
+                document.getElementById('result').style.display = 'block';
+            }
+
+            function copyEmbedCode() {
+                const embedCode = document.getElementById('embed-code');
+                embedCode.select();
+                document.execCommand('copy');
+                showToast();
+            }
+
+            function showToast() {
+                const toast = document.getElementById('toast');
+                toast.className = 'show';
+                setTimeout(() => {
+                    toast.className = toast.className.replace('show', '');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
