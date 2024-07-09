@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Bed Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input {
+            padding: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Garden Bed Calculator</h2>
+            <form id="gardenBedForm" onsubmit="calculateGardenBed(event)">
+                <label for="length">Length (meters):</label>
+                <input type="number" id="length" required>
+                <label for="width">Width (meters):</label>
+                <input type="number" id="width" required>
+                <label for="depth">Depth (meters):</label>
+                <input type="number" id="depth" required>
+                <div>
+                    <button type="submit">Calculate</button>
+                    <button type="reset" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+            <div id="result" style="display:none;">Volume of Soil Needed: <span id="volumeOfSoil">0</span> cubic meters</div>
+        </div>
+        <div class="column">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly><iframe src="https://example.com/garden-bed-calculator.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function resetForm() {
+                document.getElementById('gardenBedForm').reset();
+                document.getElementById('volumeOfSoil').textContent = '0';
+                document.getElementById('result').style.display = 'none';
+            }
+
+            function calculateGardenBed(event) {
+                event.preventDefault();
+                const length = parseFloat(document.getElementById('length').value) || 0;
+                const width = parseFloat(document.getElementById('width').value) || 0;
+                const depth = parseFloat(document.getElementById('depth').value) || 0;
+
+                if (length === 0 || width === 0 || depth === 0) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+
+                const volumeOfSoil = length * width * depth;
+                document.getElementById('volumeOfSoil').textContent = volumeOfSoil.toFixed(2);
+                document.getElementById('result').style.display = 'block';
+            }
+
+            function copyEmbedCode() {
+                const embedCode = document.getElementById('embed-code');
+                embedCode.select();
+                document.execCommand('copy');
+                showToast();
+            }
+
+            function showToast() {
+                const toast = document.getElementById('toast');
+                toast.className = 'show';
+                setTimeout(() => {
+                    toast.className = toast.className.replace('show', '');
+                }, 3000);
+            }
+
+            document.getElementById('gardenBedForm').addEventListener('submit', calculateGardenBed);
+            document.querySelector('.column button[type="reset"]').addEventListener('click', resetForm);
+            document.querySelector('.column button[onclick="copyEmbedCode()"]').addEventListener('click', copyEmbedCode);
+        });
+    </script>
+</body>
+</html>
