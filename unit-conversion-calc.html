@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Conversion Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input, select {
+            padding: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Unit Conversion Calculator</h2>
+            <form id="unitConversionForm">
+                <label for="conversionType">Select Conversion:</label>
+                <select id="conversionType" onchange="updateFormFields()">
+                    <option value="length">Length (meters to feet)</option>
+                    <option value="mass">Mass (kilograms to pounds)</option>
+                    <option value="volume">Volume (liters to gallons)</option>
+                </select>
+                <div id="inputFields"></div>
+                <button type="button" onclick="calculate()">Calculate</button>
+                <button type="reset">Reset</button>
+            </form>
+            <div id="result"></div>
+        </div>
+        <div class="column">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/unit-conversion-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        function updateFormFields() {
+            const conversionType = document.getElementById('conversionType').value;
+            const inputFields = document.getElementById('inputFields');
+            inputFields.innerHTML = '';
+
+            if (conversionType === 'length') {
+                inputFields.innerHTML += '<label for="meters">Meters:</label><input type="number" id="meters" required>';
+            } else if (conversionType === 'mass') {
+                inputFields.innerHTML += '<label for="kilograms">Kilograms:</label><input type="number" id="kilograms" required>';
+            } else if (conversionType === 'volume') {
+                inputFields.innerHTML += '<label for="liters">Liters:</label><input type="number" id="liters" required>';
+            }
+        }
+
+        function calculate() {
+            const conversionType = document.getElementById('conversionType').value;
+            let result = 0;
+
+            if (conversionType === 'length') {
+                const meters = parseFloat(document.getElementById('meters').value);
+                result = meters * 3.28084; // Convert meters to feet
+            } else if (conversionType === 'mass') {
+                const kilograms = parseFloat(document.getElementById('kilograms').value);
+                result = kilograms * 2.20462; // Convert kilograms to pounds
+            } else if (conversionType === 'volume') {
+                const liters = parseFloat(document.getElementById('liters').value);
+                result = liters * 0.264172; // Convert liters to gallons
+            }
+
+            document.getElementById('result').innerText = `Result: ${result.toFixed(2)}`;
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.className = 'show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+
+        updateFormFields();
+    </script>
+</body>
+</html>
