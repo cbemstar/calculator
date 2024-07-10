@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input, select {
+            padding: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Chemistry Calculator</h2>
+            <form id="chemistryForm">
+                <label for="calculationType">Select Calculation:</label>
+                <select id="calculationType" onchange="updateFormFields()">
+                    <option value="molarity">Molarity (M = moles / liters)</option>
+                    <option value="density">Density (D = m / V)</option>
+                    <option value="idealGasLaw">Ideal Gas Law (PV = nRT)</option>
+                </select>
+                <div id="inputFields"></div>
+                <button type="button" onclick="calculate()">Calculate</button>
+                <button type="reset">Reset</button>
+            </form>
+            <div id="result"></div>
+        </div>
+        <div class="column">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/chemistry-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        function updateFormFields() {
+            const calculationType = document.getElementById('calculationType').value;
+            const inputFields = document.getElementById('inputFields');
+            inputFields.innerHTML = '';
+
+            if (calculationType === 'molarity') {
+                inputFields.innerHTML += '<label for="moles">Moles of solute (moles):</label><input type="number" id="moles" required>';
+                inputFields.innerHTML += '<label for="volume">Volume of solution (liters):</label><input type="number" id="volume" required>';
+            } else if (calculationType === 'density') {
+                inputFields.innerHTML += '<label for="mass">Mass (grams):</label><input type="number" id="mass" required>';
+                inputFields.innerHTML += '<label for="volume">Volume (mL):</label><input type="number" id="volume" required>';
+            } else if (calculationType === 'idealGasLaw') {
+                inputFields.innerHTML += '<label for="pressure">Pressure (atm):</label><input type="number" id="pressure" required>';
+                inputFields.innerHTML += '<label for="volume">Volume (liters):</label><input type="number" id="volume" required>';
+                inputFields.innerHTML += '<label for="moles">Moles of gas (moles):</label><input type="number" id="moles" required>';
+                inputFields.innerHTML += '<label for="temperature">Temperature (K):</label><input type="number" id="temperature" required>';
+            }
+        }
+
+        function calculate() {
+            const calculationType = document.getElementById('calculationType').value;
+            let result = 0;
+
+            if (calculationType === 'molarity') {
+                const moles = parseFloat(document.getElementById('moles').value);
+                const volume = parseFloat(document.getElementById('volume').value);
+                result = moles / volume;
+            } else if (calculationType === 'density') {
+                const mass = parseFloat(document.getElementById('mass').value);
+                const volume = parseFloat(document.getElementById('volume').value);
+                result = mass / volume;
+            } else if (calculationType === 'idealGasLaw') {
+                const pressure = parseFloat(document.getElementById('pressure').value);
+                const volume = parseFloat(document.getElementById('volume').value);
+                const moles = parseFloat(document.getElementById('moles').value);
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                const R = 0.0821; // Ideal gas constant in L·atm/(K·mol)
+                result = (pressure * volume) / (moles * temperature);
+            }
+
+            document.getElementById('result').innerText = `Result: ${result.toFixed(2)}`;
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.className = 'show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+
+        updateFormFields();
+    </script>
+</body>
+</html>
