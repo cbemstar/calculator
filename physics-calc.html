@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input, select {
+            padding: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h2>Physics Calculator</h2>
+            <form id="physicsForm">
+                <label for="calculation">Select Calculation:</label>
+                <select id="calculation" name="calculation" onchange="updateForm()">
+                    <option value="force">Force (F = m * a)</option>
+                    <option value="energy">Energy (E = m * c^2)</option>
+                    <option value="pressure">Pressure (P = F / A)</option>
+                </select>
+
+                <div id="parameters"></div>
+
+                <button type="button" onclick="calculate()">Calculate</button>
+                <button type="reset" onclick="resetForm()">Reset</button>
+            </form>
+            <div id="result" style="display:none;">Result: <span id="calcResult">0</span></div>
+        </div>
+        <div class="column">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/physics-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateForm();  // Initialize form with default selection
+
+            function updateForm() {
+                const calculation = document.getElementById('calculation').value;
+                const parametersDiv = document.getElementById('parameters');
+                parametersDiv.innerHTML = '';  // Clear previous parameters
+
+                switch (calculation) {
+                    case 'force':
+                        addParameter('Mass (m):', 'mass');
+                        addParameter('Acceleration (a):', 'acceleration');
+                        break;
+                    case 'energy':
+                        addParameter('Mass (m):', 'mass');
+                        addParameter('Speed of light (c):', 'speed_of_light', '299792458', true);  // Constant value
+                        break;
+                    case 'pressure':
+                        addParameter('Force (F):', 'force');
+                        addParameter('Area (A):', 'area');
+                        break;
+                }
+            }
+
+            function addParameter(labelText, id, defaultValue = '', readonly = false) {
+                const label = document.createElement('label');
+                label.textContent = labelText;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = id;
+                input.value = defaultValue;
+                if (readonly) input.readOnly = true;
+                const parametersDiv = document.getElementById('parameters');
+                parametersDiv.appendChild(label);
+                parametersDiv.appendChild(input);
+            }
+
+            window.calculate = function() {
+                const calculation = document.getElementById('calculation').value;
+                let result = 0;
+
+                switch (calculation) {
+                    case 'force':
+                        const mass = parseFloat(document.getElementById('mass').value);
+                        const acceleration = parseFloat(document.getElementById('acceleration').value);
+                        if (!isNaN(mass) && !isNaN(acceleration)) {
+                            result = mass * acceleration;
+                        }
+                        break;
+                    case 'energy':
+                        const massEnergy = parseFloat(document.getElementById('mass').value);
+                        const speed_of_light = parseFloat(document.getElementById('speed_of_light').value);
+                        if (!isNaN(massEnergy) && !isNaN(speed_of_light)) {
+                            result = massEnergy * Math.pow(speed_of_light, 2);
+                        }
+                        break;
+                    case 'pressure':
+                        const force = parseFloat(document.getElementById('force').value);
+                        const area = parseFloat(document.getElementById('area').value);
+                        if (!isNaN(force) && !isNaN(area)) {
+                            result = force / area;
+                        }
+                        break;
+                }
+
+                document.getElementById('calcResult').textContent = result.toFixed(2);
+                document.getElementById('result').style.display = 'block';
+            }
+
+            window.resetForm = function() {
+                document.getElementById('result').style.display = 'none';
+                updateForm();
+            }
+
+            window.copyEmbedCode = function() {
+                const embedCode = document.getElementById('embed-code');
+                embedCode.select();
+                document.execCommand('copy');
+                showToast();
+            }
+
+            function showToast() {
+                const toast = document.getElementById('toast');
+                toast.className = 'show';
+                setTimeout(() => {
+                    toast.className = toast.className.replace('show', '');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
