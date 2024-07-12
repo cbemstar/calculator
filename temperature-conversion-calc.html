@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Conversion Calculator</title>
+    <style>
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+        }
+
+        label, input, button, select {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #embed-code {
+            width: 100%;
+            height: 50%;
+            margin-bottom: 10px;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h3>Temperature Conversion Calculator</h3>
+            <form id="temperatureForm" onsubmit="convertTemperature(event)">
+                <label for="temperature">Temperature:</label>
+                <input type="number" id="temperature" required>
+
+                <label for="fromUnit">From:</label>
+                <select id="fromUnit" required>
+                    <option value="Celsius">Celsius (°C)</option>
+                    <option value="Fahrenheit">Fahrenheit (°F)</option>
+                    <option value="Kelvin">Kelvin (K)</option>
+                </select>
+
+                <label for="toUnit">To:</label>
+                <select id="toUnit" required>
+                    <option value="Celsius">Celsius (°C)</option>
+                    <option value="Fahrenheit">Fahrenheit (°F)</option>
+                    <option value="Kelvin">Kelvin (K)</option>
+                </select>
+
+                <button type="submit">Convert</button>
+                <button type="reset" onclick="resetForm()">Reset</button>
+            </form>
+            <div id="result" style="display: none;"></div>
+        </div>
+
+        <div class="column">
+            <h3>Embed Code</h3>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/temperature-conversion-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+
+    <div id="toast">Embed code copied to clipboard!</div>
+
+    <script>
+        function convertTemperature(event) {
+            event.preventDefault();
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (isNaN(temperature)) {
+                alert("Please enter a valid temperature.");
+                return;
+            }
+
+            let convertedTemperature;
+
+            if (fromUnit === toUnit) {
+                convertedTemperature = temperature;
+            } else if (fromUnit === "Celsius") {
+                if (toUnit === "Fahrenheit") {
+                    convertedTemperature = (temperature * 9/5) + 32;
+                } else if (toUnit === "Kelvin") {
+                    convertedTemperature = temperature + 273.15;
+                }
+            } else if (fromUnit === "Fahrenheit") {
+                if (toUnit === "Celsius") {
+                    convertedTemperature = (temperature - 32) * 5/9;
+                } else if (toUnit === "Kelvin") {
+                    convertedTemperature = (temperature - 32) * 5/9 + 273.15;
+                }
+            } else if (fromUnit === "Kelvin") {
+                if (toUnit === "Celsius") {
+                    convertedTemperature = temperature - 273.15;
+                } else if (toUnit === "Fahrenheit") {
+                    convertedTemperature = (temperature - 273.15) * 9/5 + 32;
+                }
+            }
+
+            document.getElementById('result').innerHTML = `Converted Temperature: ${convertedTemperature.toFixed(2)} ${toUnit}`;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.className = 'show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+    </script>
+</body>
+</html>
