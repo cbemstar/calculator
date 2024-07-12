@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceleration Calculator</title>
+    <style>
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+        }
+
+        label, input, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #embed-code {
+            width: 100%;
+            height: 50%;
+            margin-bottom: 10px;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <h3>Acceleration Calculator</h3>
+            <form id="accelerationForm" onsubmit="calculateAcceleration(event)">
+                <label for="initialVelocity">Initial Velocity (m/s):</label>
+                <input type="number" id="initialVelocity" required>
+
+                <label for="finalVelocity">Final Velocity (m/s):</label>
+                <input type="number" id="finalVelocity" required>
+
+                <label for="time">Time (s):</label>
+                <input type="number" id="time" required>
+
+                <button type="submit">Calculate</button>
+                <button type="reset" onclick="resetForm()">Reset</button>
+            </form>
+            <div id="result" style="display: none;"></div>
+        </div>
+
+        <div class="column">
+            <h3>Embed Code</h3>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/acceleration-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+
+    <div id="toast">Embed code copied to clipboard!</div>
+
+    <script>
+        function calculateAcceleration(event) {
+            event.preventDefault();
+            const initialVelocity = parseFloat(document.getElementById('initialVelocity').value);
+            const finalVelocity = parseFloat(document.getElementById('finalVelocity').value);
+            const time = parseFloat(document.getElementById('time').value);
+
+            if (isNaN(initialVelocity) || isNaN(finalVelocity) || isNaN(time) || time <= 0) {
+                alert("Please enter valid numbers for all fields.");
+                return;
+            }
+
+            const acceleration = (finalVelocity - initialVelocity) / time;
+
+            document.getElementById('result').innerHTML = `Acceleration: ${acceleration.toFixed(2)} m/s²`;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.className = 'show';
+            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+        }
+    </script>
+</body>
+</html>
