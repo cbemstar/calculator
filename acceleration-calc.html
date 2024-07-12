@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceleration Calculator</title>
     <style>
-
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -25,13 +24,13 @@
             font-size: 1.5em;
         }
 
-        label, input, button {
+        label, input, select, button {
             display: block;
             margin-bottom: 10px;
             width: 100%;
         }
 
-        input {
+        input, select {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -98,11 +97,25 @@
         <div class="column">
             <h3>Acceleration Calculator</h3>
             <form id="accelerationForm" onsubmit="calculateAcceleration(event)">
-                <label for="initialVelocity">Initial Velocity (m/s):</label>
+                <label for="initialVelocity">Initial Velocity:</label>
                 <input type="number" id="initialVelocity" required>
 
-                <label for="finalVelocity">Final Velocity (m/s):</label>
+                <label for="initialVelocityUnit">Initial Velocity Unit:</label>
+                <select id="initialVelocityUnit">
+                    <option value="m/s">m/s</option>
+                    <option value="km/h">km/h</option>
+                    <option value="mph">mph</option>
+                </select>
+
+                <label for="finalVelocity">Final Velocity:</label>
                 <input type="number" id="finalVelocity" required>
+
+                <label for="finalVelocityUnit">Final Velocity Unit:</label>
+                <select id="finalVelocityUnit">
+                    <option value="m/s">m/s</option>
+                    <option value="km/h">km/h</option>
+                    <option value="mph">mph</option>
+                </select>
 
                 <label for="time">Time (s):</label>
                 <input type="number" id="time" required>
@@ -123,18 +136,33 @@
     <div id="toast">Embed code copied to clipboard!</div>
 
     <script>
+        const conversionRates = {
+            'm/s': 1,
+            'km/h': 1 / 3.6,
+            'mph': 1 / 2.237
+        };
+
+        function convertToMetersPerSecond(value, unit) {
+            return value * conversionRates[unit];
+        }
+
         function calculateAcceleration(event) {
             event.preventDefault();
             const initialVelocity = parseFloat(document.getElementById('initialVelocity').value);
             const finalVelocity = parseFloat(document.getElementById('finalVelocity').value);
             const time = parseFloat(document.getElementById('time').value);
 
+            const initialVelocityUnit = document.getElementById('initialVelocityUnit').value;
+            const finalVelocityUnit = document.getElementById('finalVelocityUnit').value;
+
             if (isNaN(initialVelocity) || isNaN(finalVelocity) || isNaN(time) || time <= 0) {
                 alert("Please enter valid numbers for all fields.");
                 return;
             }
 
-            const acceleration = (finalVelocity - initialVelocity) / time;
+            const initialVelocityMS = convertToMetersPerSecond(initialVelocity, initialVelocityUnit);
+            const finalVelocityMS = convertToMetersPerSecond(finalVelocity, finalVelocityUnit);
+            const acceleration = (finalVelocityMS - initialVelocityMS) / time;
 
             document.getElementById('result').innerHTML = `Acceleration: ${acceleration.toFixed(2)} m/s²`;
             document.getElementById('result').style.display = 'block';
