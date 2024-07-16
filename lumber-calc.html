@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumber Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: auto;
+            margin-top: 50px;
+        }
+        .calc-container, .embed-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        h3 {
+            margin-bottom: 20px;
+        }
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-size: 14px;
+            padding: 10px;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calc-container">
+            <h3>Lumber Calculator</h3>
+            <form id="lumberCalculatorForm">
+                <label for="length">Length (feet):</label>
+                <input type="number" id="length" name="length" step="0.01" required>
+                
+                <label for="width">Width (inches):</label>
+                <input type="number" id="width" name="width" step="0.01" required>
+                
+                <label for="thickness">Thickness (inches):</label>
+                <input type="number" id="thickness" name="thickness" step="0.01" required>
+                
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" step="1" required>
+                
+                <button type="button" onclick="calculateLumber()">Calculate</button>
+                <button type="reset">Reset</button>
+            </form>
+            <div id="result"></div>
+        </div>
+        <div class="embed-container">
+            <h3>Embed Code</h3>
+            <textarea id="embedCode" readonly><iframe src="https://cbemstar.github.io/calculator/lumber-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
+    </div>
+    <div id="toast">Embed code copied to clipboard!</div>
+    <script>
+        function calculateLumber() {
+            const length = parseFloat(document.getElementById('length').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const thickness = parseFloat(document.getElementById('thickness').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            if (isNaN(length) || isNaN(width) || isNaN(thickness) || isNaN(quantity)) {
+                alert('Please enter valid values.');
+                return;
+            }
+            
+            const boardFeet = (length * width * thickness * quantity) / 144;
+            document.getElementById('result').textContent = `Total Lumber: ${boardFeet.toFixed(2)} board feet`;
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embedCode');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
