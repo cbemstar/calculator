@@ -7,39 +7,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
-
-        .container {
-            font-family: 'Montserrat', 'Raleway', Arial, sans-serif;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            width: 100%;
-            max-width: 1200px;
-            padding-left: 5vw;
-            padding-right: 5vw;
+        .container-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-            transition: background-color 0.3s, color 0.3s;
-
+            min-height: 100vh;
+        }
+        .container {
+            font-family: 'Montserrat', 'Raleway', Arial, sans-serif;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
         }
         .calculator, .embed-code {
             background: white;
             border-radius: 8px;
-            padding-right: 5vw;
-            padding-left: 5vw;
-            padding-bottom: 5vw;
+            padding-right: 10%;
+            padding-left: 10%;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin: 20px;
+            margin: 10px;
             flex: 1;
+            min-width: 280px;
+            max-width: 800px;
         }
         .calculator {
             margin-right: 20px;
-            padding-left: 5vw;
-            padding-right: 5vw;
         }
         h3 {
             font-weight: 700;
@@ -48,28 +44,24 @@
         }
         label {
             display: block;
-            font-weight: 700;
+            font-weight: 400;
             margin-bottom: 10px;
         }
         input[type="number"] {
-            width: calc(100% - 30px);
+            width: calc(100% - 10px);
             padding: 10px;
             font-size: 16px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            display: inline-block;
-        }
-        input[type="number"]:last-of-type {
-            width: calc(100% - 60px);
-            display: inline-block;
-            margin-right: 10px;
         }
         select {
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            margin-bottom: 20px;
+            width: 100%;
         }
         button {
             background-color: #6200EE;
@@ -80,8 +72,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 10px;
             transition: background-color 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #3700B3;
@@ -90,10 +83,6 @@
             font-weight: 700;
             font-size: 20px;
             margin-top: 20px;
-        }
-        .embed-code {
-            display: flex;
-            flex-direction: column;
         }
         textarea {
             width: 100%;
@@ -110,19 +99,21 @@
             cursor: pointer;
         }
         .dark-mode {
-            background-color: grey;
+            background-color: #333;
             color: black;
         }
         .dark-mode input[type="number"],
-        .dark-mode textarea {
-            background-color: #444;
-            color: #f0f0f0;
+        .dark-mode .container .calculator .embed-code{
+            background-color: white;
+            color: black;
             border: 1px solid #555;
         }
         .dark-mode button {
-            background-color: black;
+            background-color: #BB86FC;
         }
-       
+        .dark-mode button:hover {
+            background-color: #6200EE;
+        }
         .toast {
             visibility: hidden;
             min-width: 250px;
@@ -161,27 +152,29 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="calculator">
-            <h3>Percentage Change Calculator</h3>
-            <label for="value">What is:</label>
-            <input type="number" id="value" placeholder="Enter the initial value">
-            <label for="percentage">by:</label>
-            <input type="number" id="percentage" placeholder="Enter the percentage" step="any">
-            <select id="operation">
-                <option value="increase">increased</option>
-                <option value="decrease">decreased</option>
-            </select>
-            <button onclick="calculate()">Calculate</button>
-            <button onclick="reset()">Reset</button>
-            <div id="result"></div>
-        </div>
-        <div class="embed-code">
-            <h3>Embed Code</h3>
-            <textarea id="embed-code" readonly>
+    <div class="container-wrapper">
+        <div class="container">
+            <div class="calculator">
+                <h3>Percentage Change Calculator</h3>
+                <label for="value">What is:</label>
+                <input type="number" id="value" placeholder="Enter the initial value">
+                <label for="percentage">by:</label>
+                <input type="number" id="percentage" placeholder="Enter the percentage" step="any">
+                <select id="operation">
+                    <option value="increase">increased</option>
+                    <option value="decrease">decreased</option>
+                </select>
+                <button onclick="calculate()">Calculate</button>
+                <button onclick="reset()">Reset</button>
+                <div id="result"></div>
+            </div>
+            <div class="embed-code">
+                <h3>Embed Code</h3>
+                <textarea id="embed-code" readonly>
 <iframe src="https://cbemstar.github.io/calculator/percentage-change-calc.html" width="100%" height="600" frameborder="0"></iframe>
-            </textarea>
-            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+                </textarea>
+                <button onclick="copyEmbedCode()">Copy Embed Code</button>
+            </div>
         </div>
     </div>
     <span id="dark-mode-toggle" class="material-icons" onclick="toggleDarkMode()">brightness_3</span>
