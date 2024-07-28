@@ -118,7 +118,7 @@
 		<div class="embed-code">
 			<h2>Embed Code</h2>
 			<textarea id="embed-code" readonly>
-				<iframe src="calculator-url" frameborder="0" width="100%" height="300"></iframe>
+				<iframe src="https://cbemstar.github.io/calculator/recipe-measurements-calc.html" frameborder="0" width="100%" height="300"></iframe>
 			</textarea>
 			<button id="copy-btn">Copy Embed Code</button>
 		</div>
