@@ -5,58 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumber Calculator</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
         .container {
             display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            max-width: 900px;
+            flex-wrap: wrap;
+            gap: 40px;
+            max-width: 1200px;
             width: 100%;
-            background: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            margin: auto;
-            margin-top: 50px;
+            margin: 20px;
+            justify-content: space-between;
         }
+
         .calc-container, .embed-container {
-            flex: 1;
-            min-width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
+
+        @media (max-width: 768px) {
+            .calc-container, .embed-container {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
         h3 {
+            font-size: 1.5rem;
             margin-bottom: 20px;
         }
-        label, input, select, button {
+
+        label, input, button {
             display: block;
             margin-bottom: 10px;
             width: 100%;
-            padding: 10px;
-            font-size: 16px;
         }
+
+        input {
+            padding: 10px 20px; /* Equal padding on both sides */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
         button {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #000;
             border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
             cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #333;
         }
+
         #result {
-            margin-top: 20px;
             font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
         }
-        textarea {
+
+        #embed-code {
             width: 100%;
             height: 150px;
-            font-size: 14px;
-            padding: 10px;
+            margin-bottom: 10px;
+            resize: none;
         }
+
         #toast {
             visibility: hidden;
             min-width: 250px;
-            margin-left: -125px;
             background-color: #333;
-            color: white;
+            color: #fff;
             text-align: center;
             border-radius: 2px;
             padding: 16px;
@@ -64,33 +102,32 @@
             z-index: 1;
             left: 50%;
             bottom: 30px;
-            font-size: 17px;
+            transform: translateX(-50%);
         }
+
         #toast.show {
             visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
-        }
+
         @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
         }
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
-        }
+
         @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="embed-container">
+            <h3>Embed Code</h3>
+            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/lumber-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
         <div class="calc-container">
             <h3>Lumber Calculator</h3>
             <form id="lumberCalculatorForm">
@@ -111,11 +148,6 @@
             </form>
             <div id="result"></div>
         </div>
-        <div class="embed-container">
-            <h3>Embed Code</h3>
-            <textarea id="embedCode" readonly><iframe src="https://cbemstar.github.io/calculator/lumber-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
-            <button onclick="copyEmbedCode()">Copy Embed Code</button>
-        </div>
     </div>
     <div id="toast">Embed code copied to clipboard!</div>
     <script>
@@ -135,7 +167,7 @@
         }
 
         function copyEmbedCode() {
-            const embedCode = document.getElementById('embedCode');
+            const embedCode = document.getElementById('embed-code');
             embedCode.select();
             document.execCommand('copy');
             showToast();
