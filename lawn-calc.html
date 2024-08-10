@@ -5,94 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lawn Area Calculator</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
         .container {
             display: flex;
-            justify-content: space-between;
-            gap: 20px;
             flex-wrap: wrap;
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px;
+            justify-content: space-between;
         }
+
         .calc-container, .embed-container {
-            flex: 1;
-            min-width: 300px;
+            background-color: #fff;
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            margin: 10px;
-        }
-        .calc-container {
-            order: 2;
-        }
-        .embed-container {
-            order: 1;
-        }
-        .calc-input {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 5px;
-        }
-        .calc-button {
-            background-color: #000;
-            color: white;
-            border: none;
-            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             width: 48%;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin: 5px 1%;
+            box-sizing: border-box;
         }
-        .calc-button:hover {
-            background-color: #444;
+
+        @media (max-width: 768px) {
+            .calc-container, .embed-container {
+                width: 100%;
+                margin-bottom: 20px;
+            }
         }
-        .calc-result {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        .calc-container h1 {
+
+        h1, h2 {
             font-size: 1.5rem;
+            margin-bottom: 20px;
         }
-        .embed-container textarea {
+
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
             width: 100%;
-            padding: 10px;
+        }
+
+        input, select {
+            padding: 10px 20px; /* Equal padding on both sides */
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #000;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        .calc-result {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #embed-code {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
             resize: none;
         }
-        .copy-button {
-            background-color: #000;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-top: 10px;
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
         }
-        .copy-button:hover {
-            background-color: #444;
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
-        @media (max-width: 991px) {
-            .calc-container {
-                order: 2;
-            }
-            .embed-container {
-                order: 1;
-            }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="embed-container">
-            <h2>Embed Lawn Area Calculator</h2>
-            <textarea readonly>
-<iframe src="https://cbemstar.github.io/calculator/lawn-calc.html" width="100%" height="600" frameborder="0"></iframe>
-            </textarea>
-            <button class="copy-button" onclick="copyEmbedCode()">Copy</button>
-        </div>
         <div class="calc-container">
             <h1>Lawn Area Calculator</h1>
             <form id="lawnAreaForm" onsubmit="calculateLawnArea(event)">
@@ -138,7 +168,16 @@
                 <p>Lawn Area: <span id="lawnArea">0.00</span> square units</p>
             </div>
         </div>
+        <div class="embed-container">
+            <h2>Embed Lawn Area Calculator</h2>
+            <textarea id="embed-code" readonly>
+<iframe src="https://cbemstar.github.io/calculator/lawn-calc.html" width="100%" height="600" frameborder="0"></iframe>
+            </textarea>
+            <button class="copy-button" onclick="copyEmbedCode()">Copy</button>
+        </div>
     </div>
+
+    <div id="toast">Embed code copied to clipboard!</div>
 
     <script>
         function formatNumber(input) {
@@ -202,26 +241,29 @@
                     sideLength = parseFloat(document.getElementById(`side${i}`).value.replace(/,/g, '')) || 0;
                     perimeter += sideLength;
                 }
-
                 const apothem = (sideLength / (2 * Math.tan(Math.PI / sides))) || 0;
-                area = (perimeter * apothem) / 2;
-            }
-
-            document.getElementById('lawnArea').textContent = area.toFixed(2);
-            document.getElementById('result').style.display = 'block';
+            area = (perimeter * apothem) / 2;
         }
 
-        function copyEmbedCode() {
-            const embedCode = document.querySelector('.embed-container textarea');
-            embedCode.select();
-            embedCode.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand('copy');
+        document.getElementById('lawnArea').textContent = area.toFixed(2);
+        document.getElementById('result').style.display = 'block';
+    }
 
-            alert('Embed code copied to clipboard!');
-        }
+    function copyEmbedCode() {
+        const embedCode = document.querySelector('.embed-container textarea');
+        embedCode.select();
+        embedCode.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand('copy');
 
-        // Initialize form
-        updateForm();
-    </script>
+        const toast = document.getElementById('toast');
+        toast.className = 'show';
+        setTimeout(() => {
+            toast.className = toast.className.replace('show', '');
+        }, 3000);
+    }
+
+    // Initialize form
+    updateForm();
+</script>
 </body>
 </html>
