@@ -1,64 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Mortgage Calculator with Pie Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .main-container {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            padding: 20px;
-        }
-        .calc-container, .embed-container {
-            flex: 1;
-            min-width: 300px;
-            margin: 10px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .embed-container {
-            max-width: 300px;
-            position: -webkit-sticky;
-            position: sticky;
-            top: 20px;
-            align-self: flex-start;
-        }
-        .calc-input {
+            gap: 40px;
+            max-width: 1200px;
             width: 100%;
-            padding: 10px;
-            margin: 5px 0 15px;
-            border: 1px solid #ccc;
+            margin: 20px;
+            justify-content: space-between;
+        }
+
+        .column {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
-        .calc-button {
-            background-color: #000;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+
+        @media (max-width: 768px) {
+            .column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
         }
-        .calc-button:hover {
-            background-color: #333;
-        }
-        .calc-result {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        .calc-container h1 {
+
+        h3 {
             font-size: 1.5rem;
+            margin-bottom: 20px;
         }
-        .toast {
+
+        label,
+        input,
+        select,
+        button {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        input,
+        select {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: black;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: grey;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #embed-code {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        #toast {
             visibility: hidden;
             min-width: 250px;
-            margin-left: -125px;
             background-color: #333;
             color: #fff;
             text-align: center;
@@ -68,78 +106,107 @@
             z-index: 1;
             left: 50%;
             bottom: 30px;
-            font-size: 17px;
             transform: translateX(-50%);
-            transition: all 0.3s ease;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
         }
     </style>
 </head>
+
 <body>
-    <div class="main-container">
-        <div class="embed-container">
-            <h2>Embed Mortgage Calculator</h2>
-            <div id="embedCode">&lt;iframe src="https://cbemstar.github.io/calculator/mortgage-calc.html" width="100%" height="1400" frameborder="0"&gt;&lt;/iframe&gt;</div>
-            <button onclick="copyEmbedCode()">Copy</button>
-        </div>
-        <div class="calc-container">
-            <h1>Mortgage Calculator</h1>
+    <div class="container">
+        <div class="column">
+            <h3>Mortgage Calculator</h3>
             <form id="mortgageCalcForm" onsubmit="calculateMortgage(event)">
                 <label for="homePrice">Home Price:</label>
-                <input type="text" id="homePrice" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="homePrice" required oninput="formatNumber(this)">
                 <label for="downPayment">Down Payment:</label>
-                <input type="text" id="downPayment" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="downPayment" required oninput="formatNumber(this)">
                 <label for="loanAmount">Loan Amount:</label>
-                <input type="text" id="loanAmount" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="loanAmount" required oninput="formatNumber(this)">
                 <label for="interestRate">Interest Rate (%):</label>
-                <input type="text" id="interestRate" class="calc-input" required>
+                <input type="text" id="interestRate" required>
                 <label for="loanTerm">Loan Term (years):</label>
-                <input type="text" id="loanTerm" class="calc-input" required>
+                <input type="text" id="loanTerm" required>
                 <label for="startDate">Start Date:</label>
-                <input type="month" id="startDate" class="calc-input" required>
+                <input type="month" id="startDate" required>
                 <label for="propertyTax">Property Tax (annual):</label>
-                <input type="text" id="propertyTax" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="propertyTax" required oninput="formatNumber(this)">
                 <label for="propertyInsurance">Property Insurance (annual):</label>
-                <input type="text" id="propertyInsurance" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="propertyInsurance" required oninput="formatNumber(this)">
                 <label for="extraMonthlyPayments">Extra Monthly Payments:</label>
-                <input type="text" id="extraMonthlyPayments" class="calc-input" required oninput="formatNumber(this)">
+                <input type="text" id="extraMonthlyPayments" required oninput="formatNumber(this)">
                 <label for="monthlyIncome">Monthly Income:</label>
-                <input type="text" id="monthlyIncome" class="calc-input" required oninput="formatNumber(this)">
-                <button type="submit" class="calc-button">Calculate</button>
+                <input type="text" id="monthlyIncome" required oninput="formatNumber(this)">
+                <button type="submit">Calculate</button>
+                <button type="reset" onclick="resetForm()">Reset</button>
             </form>
-            <div class="calc-result" id="result">
+            <div id="result" style="display: none;">
                 Monthly Payment: $<span id="monthlyPayment"></span><br>
                 Affordability Ratio: <span id="affordabilityRatio"></span>%
             </div>
             <canvas id="mortgagePieChart" width="400" height="400"></canvas>
         </div>
+
+        <div class="column">
+            <h3>Embed Code</h3>
+            <textarea id="embed-code" readonly>&lt;iframe src="https://cbemstar.github.io/calculator/mortgage-calc.html" width="100%" height="1400" frameborder="0"&gt;&lt;/iframe&gt;</textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
+        </div>
     </div>
 
-    <div id="toast" class="toast">Embed code copied to clipboard!</div>
-
+    <div id="toast">Embed code copied to clipboard!</div>
     <script>
         function formatNumber(input) {
             const value = input.value.replace(/\D/g, '');
             input.value = Number(value).toLocaleString();
         }
-
+    
         function copyEmbedCode() {
-            const embedCode = document.getElementById('embedCode').innerText;
-            navigator.clipboard.writeText(embedCode).then(function() {
-                showToast();
-            }, function(err) {
-                console.error('Could not copy text: ', err);
-            });
+            const embedCode = document.getElementById('embed-code');
+            embedCode.select();
+            document.execCommand('copy');
+            showToast();
         }
-
+    
         function showToast() {
             const toast = document.getElementById('toast');
-            toast.style.visibility = 'visible';
-            setTimeout(function() { toast.style.visibility = 'hidden'; }, 3000);
+            toast.className = 'show';
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
         }
-
+    
         function calculateMortgage(event) {
             event.preventDefault();
-
+    
             const homePrice = parseFloat(document.getElementById('homePrice').value.replace(/,/g, ''));
             const downPayment = parseFloat(document.getElementById('downPayment').value.replace(/,/g, ''));
             const loanAmount = parseFloat(document.getElementById('loanAmount').value.replace(/,/g, ''));
@@ -149,22 +216,24 @@
             const propertyInsurance = parseFloat(document.getElementById('propertyInsurance').value.replace(/,/g, '')) / 12;
             const extraMonthlyPayments = parseFloat(document.getElementById('extraMonthlyPayments').value.replace(/,/g, ''));
             const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value.replace(/,/g, ''));
-
+    
             if (isNaN(homePrice) || isNaN(downPayment) || isNaN(loanAmount) || isNaN(interestRate) || isNaN(loanTerm) || isNaN(propertyTax) || isNaN(propertyInsurance) || isNaN(extraMonthlyPayments) || isNaN(monthlyIncome)) {
                 alert("Please fill out all required fields.");
                 return;
             }
-
+    
             const principalAndInterest = (loanAmount * interestRate) / (1 - Math.pow(1 + interestRate, -loanTerm));
             const monthlyPayment = principalAndInterest + propertyTax + propertyInsurance + extraMonthlyPayments;
             const affordabilityRatio = (monthlyPayment / monthlyIncome) * 100;
-
+    
             document.getElementById('monthlyPayment').textContent = monthlyPayment.toFixed(2);
             document.getElementById('affordabilityRatio').textContent = affordabilityRatio.toFixed(2);
-
+    
+            document.getElementById('result').style.display = 'block';
+    
             displayPieChart(monthlyPayment, propertyTax, propertyInsurance, principalAndInterest);
         }
-
+    
         function displayPieChart(monthlyPayment, propertyTax, propertyInsurance, principalAndInterest) {
             const ctx = document.getElementById('mortgagePieChart').getContext('2d');
             new Chart(ctx, {
