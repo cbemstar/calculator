@@ -6,87 +6,90 @@
     <title>Percentage Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-   
-        .container {
-            height: 100vh;
-            width: 100%;
-            background: var(--container-bg, white);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            text-align: center;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
-            flex-direction: row;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color, #f5f5f5);
+            color: var(--text-color, #333);
+        }
+
+        .container {
+            display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px;
+            justify-content: space-between;
         }
-        .calc-container, .embed-container {
-            flex: 1;
-            min-width: 300px;
-           padding-right: 5vw;
-           padding-left: 5vw;
-           align-items: center;
+
+        .column {
+            background-color: var(--container-bg, white);
+            padding: 20px;
+            border: 1px solid var(--input-border, #ddd);
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
+
+        @media (max-width: 768px) {
+            .column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
         h3 {
-            margin-bottom: 20px;
-            font-weight: 500;
             font-size: 1.5rem;
+            margin-bottom: 20px;
             color: var(--heading-color, #333);
         }
-        label {
+
+        label, input, button {
             display: block;
             margin-bottom: 10px;
-            font-size: 1rem;
-            color: var(--label-color, #666);
-        }
-        .input-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        input {
             width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            margin-right: 5px;
+        }
+
+        input {
+            padding: 10px 20px;
             border: 1px solid var(--input-border, #ccc);
-            border-radius: 4px;
+            border-radius: 5px;
+            box-sizing: border-box;
             background-color: var(--input-bg, white);
             color: var(--input-text, #333);
         }
-        .percent-sign {
-            font-size: 16px;
-            color: var(--label-color, #666);
-        }
-        .btn-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+
         button {
-            padding: 10px 10px;
-            font-size: 11px;
-            background-color: #6200ea;
-            color: white;
+            background-color: black;
             border: none;
-            border-radius: 4px;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            flex: 1 1 45%;
+            border-radius: 5px;
+            margin-top: 10px;
         }
+
         button:hover {
-            background-color: #3700b3;
+            background-color: grey;
         }
+
         #result {
-            margin-top: 20px;
             font-weight: bold;
-            font-size: 18px;
+            margin-top: 20px;
+            text-align: center;
             color: var(--text-color, #333);
         }
-        textarea {
+
+        #embed-code {
             width: 100%;
             height: 100px;
             font-size: 14px;
@@ -97,42 +100,37 @@
             background-color: var(--input-bg, white);
             color: var(--input-text, #333);
         }
+
         #toast {
             visibility: hidden;
             min-width: 250px;
-            margin-left: -125px;
             background-color: #333;
-            color: white;
+            color: #fff;
             text-align: center;
-            border-radius: 4px;
+            border-radius: 2px;
             padding: 16px;
             position: fixed;
             z-index: 1;
             left: 50%;
             bottom: 30px;
-            font-size: 17px;
+            transform: translateX(-50%);
         }
+
         #toast.show {
             visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
-        }
+
         @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
         }
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
-        }
+
         @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
         }
+
         .dark-mode-toggle {
             position: absolute;
             top: 20px;
@@ -140,6 +138,7 @@
             cursor: pointer;
             font-size: 20px;
         }
+
         [data-tooltip]:hover:after {
             content: attr(data-tooltip);
             position: absolute;
@@ -159,30 +158,28 @@
 <body>
     <div class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</div>
     <div class="container">
-        <div class="calc-container">
+        <div class="column">
             <h3>x is p% of what?</h3>
             <form id="percentageCalculatorForm">
                 <label for="xValue" data-tooltip="Enter the value of x">x:</label>
-                <div class="input-container">
-                    <input type="number" id="xValue" name="xValue" step="0.01" required>
-                </div>
+                <input type="number" id="xValue" name="xValue" step="0.01" required oninput="formatNumber(this)">
                 
                 <label for="pValue" data-tooltip="Enter the percentage value">is what percent:</label>
                 <div class="input-container">
-                    <input type="number" id="pValue" name="pValue" step="0.01" required>
+                    <input type="number" id="pValue" name="pValue" step="0.01" required oninput="formatNumber(this)">
                     <span class="percent-sign">%</span>
                 </div>
                 
                 <div class="btn-container">
                     <button type="button" onclick="calculatePercentage()">Calculate</button>
-                    <button type="reset">Reset</button>
+                    <button type="reset" onclick="resetForm()">Reset</button>
                 </div>
             </form>
             <div id="result"></div>
         </div>
-        <div class="embed-container">
+        <div class="column">
             <h3>Embed Code</h3>
-            <textarea id="embedCode" readonly>
+            <textarea id="embed-code" readonly>
 <iframe src="https://cbemstar.github.io/calculator/percentage-calc.html" width="100%" height="600" frameborder="0"></iframe>
             </textarea>
             <button onclick="copyEmbedCode()">Copy Embed Code</button>
@@ -190,9 +187,14 @@
     </div>
     <div id="toast">Embed code copied to clipboard!</div>
     <script>
+        function formatNumber(input) {
+            const value = input.value.replace(/\D/g, '');
+            input.value = Number(value).toLocaleString();
+        }
+
         function calculatePercentage() {
-            const xValue = parseFloat(document.getElementById('xValue').value);
-            const pValue = parseFloat(document.getElementById('pValue').value);
+            const xValue = parseFloat(document.getElementById('xValue').value.replace(/,/g, ''));
+            const pValue = parseFloat(document.getElementById('pValue').value.replace(/,/g, ''));
             
             if (isNaN(xValue) || isNaN(pValue) || pValue === 0) {
                 alert('Please enter valid values.');
@@ -204,7 +206,7 @@
         }
 
         function copyEmbedCode() {
-            const embedCode = document.getElementById('embedCode');
+            const embedCode = document.getElementById('embed-code');
             embedCode.select();
             document.execCommand('copy');
             showToast();
@@ -214,6 +216,10 @@
             const toast = document.getElementById('toast');
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function resetForm() {
+            document.getElementById('result').innerHTML = '';
         }
 
         function toggleDarkMode() {
@@ -237,7 +243,7 @@
                 document.documentElement.style.setProperty('--input-bg', 'white');
                 document.documentElement.style.setProperty('--input-text', '#333');
             }
-        }å
+        }
     </script>
 </body>
 </html>
