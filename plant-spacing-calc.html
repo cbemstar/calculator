@@ -5,19 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plant Spacing Calculator</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px;
+            justify-content: space-between;
         }
 
         .column {
-            flex: 1;
-            min-width: 300px;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
 
-        form {
+        @media (max-width: 768px) {
+            .column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
+        h2 {
+            font-size: 1.5rem;
             margin-bottom: 20px;
+            color: #333;
         }
 
         label, input, button {
@@ -27,37 +56,51 @@
         }
 
         input {
-            padding: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: white;
+            color: #333;
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: black;
             border: none;
             color: white;
-            padding: 10px 20px;
+            padding: 10px;
             text-align: center;
-            text-decoration: none;
-            display: inline-block;
             font-size: 16px;
-            margin: 4px 2px;
             cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: grey;
         }
 
         #result {
             font-weight: bold;
             margin-top: 20px;
+            text-align: center;
         }
 
         #embed-code {
             width: 100%;
-            height: 150px;
-            margin-bottom: 10px;
+            height: 100px;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            background-color: white;
+            color: #333;
         }
 
         #toast {
             visibility: hidden;
             min-width: 250px;
-            margin-left: -125px;
             background-color: #333;
             color: #fff;
             text-align: center;
@@ -67,32 +110,22 @@
             z-index: 1;
             left: 50%;
             bottom: 30px;
+            transform: translateX(-50%);
         }
 
         #toast.show {
             visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
 
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-
         @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
         }
 
         @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
         }
     </style>
 </head>
@@ -102,34 +135,39 @@
             <h2>Plant Spacing Calculator</h2>
             <form id="plantSpacingForm" onsubmit="calculatePlantSpacing(event)">
                 <label for="areaLength">Area Length (ft):</label>
-                <input type="number" id="areaLength" class="calc-input" required>
+                <input type="number" id="areaLength" required>
                 <label for="areaWidth">Area Width (ft):</label>
-                <input type="number" id="areaWidth" class="calc-input" required>
+                <input type="number" id="areaWidth" required>
                 <label for="plantSpacing">Plant Spacing (inches):</label>
-                <input type="number" id="plantSpacing" class="calc-input" required>
+                <input type="number" id="plantSpacing" required>
                 <div>
-                    <button type="submit" class="calc-button">Calculate</button>
-                    <button type="reset" class="calc-button" onclick="resetForm()">Reset</button>
+                    <button type="submit">Calculate</button>
+                    <button type="reset" onclick="resetForm()">Reset</button>
                 </div>
             </form>
             <div id="result" style="display:none;">Number of Plants: <span id="numberOfPlants">0</span></div>
         </div>
         <div class="column">
             <h2>Embed Code</h2>
-            <textarea id="embed-code" readonly><iframe src="https://example.com/plant-spacing-calculator.html" width="100%" height="600" frameborder="0"></iframe></textarea>
+            <textarea id="embed-code" readonly>
+<iframe src="https://example.com/plant-spacing-calculator.html" width="100%" height="600" frameborder="0"></iframe>
+            </textarea>
             <button id="copy-btn" onclick="copyEmbedCode()">Copy Embed Code</button>
         </div>
     </div>
     <div id="toast">Embed code copied to clipboard!</div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('plantSpacingForm').addEventListener('reset', resetForm);
+            document.getElementById('copy-btn').addEventListener('click', copyEmbedCode);
+
             function resetForm() {
                 document.getElementById('plantSpacingForm').reset();
                 document.getElementById('numberOfPlants').textContent = '0';
                 document.getElementById('result').style.display = 'none';
             }
 
-            function calculatePlantSpacing(event) {
+            window.calculatePlantSpacing = function(event) {
                 event.preventDefault();
                 const length = parseFloat(document.getElementById('areaLength').value) || 0;
                 const width = parseFloat(document.getElementById('areaWidth').value) || 0;
