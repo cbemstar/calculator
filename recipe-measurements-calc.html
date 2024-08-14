@@ -5,115 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Measurement Converter</title>
     <style>
-        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
         .calculator-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px;
+            justify-content: space-between;
         }
-        
-        .embed-code, .calculator {
+
+        .calculator, .embed-code {
             background-color: #fff;
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            width: calc(50% - 20px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
-        
+
         @media (max-width: 768px) {
-            .embed-code, .calculator {
+            .calculator, .embed-code {
                 width: 100%;
+                margin-bottom: 20px;
             }
         }
-        
-        .calculator select, .calculator input {
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        select, input, button, textarea {
+            width: 100%;
             padding: 10px;
-            border: none;
-            border-radius: 5px;
             margin-bottom: 10px;
-            width: 100%;
-        }
-        
-        .calculator button {
-            background-color: #000;
-            color: #fff;
-            cursor: pointer;
-            padding: 10px;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            width: 100%;
+            box-sizing: border-box;
         }
-        
-        .calculator button:hover {
-            background-color: #333;
+
+        button {
+            background-color: black;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-        
+
+        button:hover {
+            background-color: grey;
+        }
+
         .results {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 10px;
         }
-        
+
         .result-card {
             background-color: #f7f7f7;
             padding: 20px;
             border-radius: 5px;
-            width: calc(50% - 15px);
+            width: calc(50% - 10px);
         }
-        
+
         @media (max-width: 480px) {
             .result-card {
                 width: 100%;
             }
         }
-        
-        h2 {
-            font-weight: normal;
-        }
-        
-        .embed-code textarea {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .embed-code button {
-            background-color: #000;
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
             color: #fff;
-            cursor: pointer;
-            padding: 10px;
-            border: none;
+            text-align: center;
             border-radius: 5px;
-            width: 100%;
-        }
-        
-        .toast-notification {
+            padding: 16px;
             position: fixed;
-            bottom: 20px;
+            z-index: 1;
             left: 50%;
+            bottom: 30px;
             transform: translateX(-50%);
-            background-color: #000;
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
+            transition: all 0.5s ease;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div class="calculator-container">
-        <div class="embed-code">
-            <h2>Embed Code</h2>
-            <textarea id="embed-code" readonly>
-<iframe src="https://cbemstar.github.io/calculator/recipe-measurements-calc.html" frameborder="0" width="100%" height="300"></iframe>
-            </textarea>
-            <button id="copy-btn">Copy Embed Code</button>
-        </div>
         <div class="calculator">
             <h2>Measurement Converter</h2>
             <select id="unit">
@@ -126,23 +135,34 @@
             <input type="number" id="value" placeholder="Value">
             <button id="convert-btn">Convert</button>
             <div class="results">
-                <div class="result-card" id="result-1"></div>
-                <div class="result-card" id="result-2"></div>
-                <div class="result-card" id="result-3"></div>
-                <div class="result-card" id="result-4"></div>
+                <div class="result-card" id="result-teaspoon" style="display:none;"></div>
+                <div class="result-card" id="result-tablespoon" style="display:none;"></div>
+                <div class="result-card" id="result-gram" style="display:none;"></div>
+                <div class="result-card" id="result-milliliter" style="display:none;"></div>
+                <div class="result-card" id="result-ounce" style="display:none;"></div>
             </div>
         </div>
+        <div class="embed-code">
+            <h2>Embed Code</h2>
+            <textarea id="embed-code" readonly>
+<iframe src="https://cbemstar.github.io/calculator/recipe-measurements-calc.html" frameborder="0" width="100%" height="300"></iframe>
+            </textarea>
+            <button id="copy-btn">Copy Embed Code</button>
+        </div>
     </div>
+    <div id="toast">Embed code copied to clipboard!</div>
     <script>
         const unitSelect = document.getElementById('unit');
         const valueInput = document.getElementById('value');
         const convertBtn = document.getElementById('convert-btn');
-        const resultCards = document.querySelectorAll('.result-card');
+        const resultTeaspoon = document.getElementById('result-teaspoon');
+        const resultTablespoon = document.getElementById('result-tablespoon');
+        const resultGram = document.getElementById('result-gram');
+        const resultMilliliter = document.getElementById('result-milliliter');
+        const resultOunce = document.getElementById('result-ounce');
         const embedCode = document.getElementById('embed-code');
         const copyBtn = document.getElementById('copy-btn');
-        const toastNotification = document.createElement('div');
-        toastNotification.className = 'toast-notification';
-        document.body.appendChild(toastNotification);
+        const toast = document.getElementById('toast');
 
         convertBtn.addEventListener('click', convertMeasurement);
         copyBtn.addEventListener('click', copyEmbedCode);
@@ -151,54 +171,84 @@
             const unit = unitSelect.value;
             const value = parseFloat(valueInput.value);
             if (isNaN(value)) return;
-            let grams, tablespoons, milliliters, ounces;
+            let teaspoons, tablespoons, grams, milliliters, ounces;
+            resultTeaspoon.style.display = 'block';
+            resultTablespoon.style.display = 'block';
+            resultGram.style.display = 'block';
+            resultMilliliter.style.display = 'block';
+            resultOunce.style.display = 'block';
             switch (unit) {
                 case 'teaspoon':
                     grams = value * 5;
                     tablespoons = value / 3;
                     milliliters = value * 5;
                     ounces = value / 6;
+                    resultTeaspoon.style.display = 'none';
+                    resultTablespoon.innerHTML = `Tablespoon: ${tablespoons.toFixed(2)}`;
+                    resultGram.innerHTML = `Gram: ${grams.toFixed(2)}`;
+                    resultMilliliter.innerHTML = `Milliliter: ${milliliters.toFixed(2)}`;
+                    resultOunce.innerHTML = `Ounce: ${ounces.toFixed(2)}`;
                     break;
                 case 'tablespoon':
+                    teaspoons = value * 3;
                     grams = value * 15;
-                    tablespoons = value;
                     milliliters = value * 15;
                     ounces = value / 2;
+                    resultTeaspoon.innerHTML = `Teaspoon: ${teaspoons.toFixed(2)}`;
+                    resultTablespoon.style.display = 'none';
+                    resultGram.innerHTML = `Gram: ${grams.toFixed(2)}`;
+                    resultMilliliter.innerHTML = `Milliliter: ${milliliters.toFixed(2)}`;
+                    resultOunce.innerHTML = `Ounce: ${ounces.toFixed(2)}`;
                     break;
                 case 'gram':
-                    grams = value;
+                    teaspoons = value / 5;
                     tablespoons = value / 15;
                     milliliters = value;
                     ounces = value / 28.35;
+                    resultTeaspoon.innerHTML = `Teaspoon: ${teaspoons.toFixed(2)}`;
+                    resultTablespoon.innerHTML = `Tablespoon: ${tablespoons.toFixed(2)}`;
+                    resultGram.style.display = 'none';
+                    resultMilliliter.innerHTML = `Milliliter: ${milliliters.toFixed(2)}`;
+                    resultOunce.innerHTML = `Ounce: ${ounces.toFixed(2)}`;
                     break;
                 case 'milliliter':
-                    grams = value;
+                    teaspoons = value / 5;
                     tablespoons = value / 15;
-                    milliliters = value;
+                    grams = value;
                     ounces = value / 29.57;
+                    resultTeaspoon.innerHTML = `Teaspoon: ${teaspoons.toFixed(2)}`;
+                    resultTablespoon.innerHTML = `Tablespoon: ${tablespoons.toFixed(2)}`;
+                    resultGram.innerHTML = `Gram: ${grams.toFixed(2)}`;
+                    resultMilliliter.style.display = 'none';
+                    resultOunce.innerHTML = `Ounce: ${ounces.toFixed(2)}`;
                     break;
                 case 'ounce':
-                    grams = value * 28.35;
+                    teaspoons = value * 6;
                     tablespoons = value * 2;
+                    grams = value * 28.35;
                     milliliters = value * 29.57;
-                    ounces = value;
+                    resultTeaspoon.innerHTML = `Teaspoon: ${teaspoons.toFixed(2)}`;
+                    resultTablespoon.innerHTML = `Tablespoon: ${tablespoons.toFixed(2)}`;
+                    resultGram.innerHTML = `Gram: ${grams.toFixed(2)}`;
+                    resultMilliliter.innerHTML = `Milliliter: ${milliliters.toFixed(2)}`;
+                    resultOunce.style.display = 'none';
                     break;
             }
-            resultCards[0].innerHTML = `Gram: ${grams.toFixed(2)}`;
-            resultCards[1].innerHTML = `Tablespoon: ${tablespoons.toFixed(2)}`;
-            resultCards[2].innerHTML = `Milliliter: ${milliliters.toFixed(2)}`;
-            resultCards[3].innerHTML = `Ounce: ${ounces.toFixed(2)}`;
         }
 
         function copyEmbedCode() {
             embedCode.select();
             document.execCommand('copy');
-            toastNotification.innerText = 'Embed code copied!';
-            toastNotification.style.display = 'block';
+            showToast();
+        }
+
+        function showToast() {
+            toast.className = 'show';
             setTimeout(() => {
-                toastNotification.style.display = 'none';
-            }, 2000);
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
         }
     </script>
 </body>
 </html>
+
