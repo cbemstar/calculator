@@ -5,68 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unit Conversion Calculator</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-        }
-        .column {
-            flex: 1;
-            min-width: 300px;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label, input, select, button {
-            display: block;
-            margin-bottom: 10px;
+            gap: 40px;
+            max-width: 1200px;
             width: 100%;
+            margin: 20px;
+            justify-content: space-between;
         }
-        input, select {
-            padding: 5px;
+
+        .column {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 48%;
+            box-sizing: border-box;
         }
+
+        @media (max-width: 768px) {
+            .column {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label, input, select, button, textarea {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
         button {
-            background-color: #4CAF50;
-            border: none;
+            background-color: black;
             color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
+        button:hover {
+            background-color: grey;
+        }
+
         #result {
             font-weight: bold;
             margin-top: 20px;
         }
-        #embed-code {
-            width: 100%;
-            height: 150px;
-            margin-bottom: 10px;
-        }
+
         #toast {
             visibility: hidden;
             min-width: 250px;
             background-color: #333;
             color: #fff;
             text-align: center;
-            border-radius: 2px;
+            border-radius: 5px;
             padding: 16px;
             position: fixed;
             z-index: 1;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
+            transition: all 0.5s ease;
         }
+
         #toast.show {
             visibility: visible;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
+
         @keyframes fadein {
             from { bottom: 0; opacity: 0; }
             to { bottom: 30px; opacity: 1; }
         }
+
         @keyframes fadeout {
             from { bottom: 30px; opacity: 1; }
             to { bottom: 0; opacity: 0; }
@@ -86,7 +120,7 @@
                 </select>
                 <div id="inputFields"></div>
                 <button type="button" onclick="calculate()">Calculate</button>
-                <button type="reset">Reset</button>
+                <button type="reset" onclick="resetForm()">Reset</button>
             </form>
             <div id="result"></div>
         </div>
@@ -118,16 +152,26 @@
 
             if (conversionType === 'length') {
                 const meters = parseFloat(document.getElementById('meters').value);
-                result = meters * 3.28084; // Convert meters to feet
+                if (!isNaN(meters)) {
+                    result = meters * 3.28084; // Convert meters to feet
+                }
             } else if (conversionType === 'mass') {
                 const kilograms = parseFloat(document.getElementById('kilograms').value);
-                result = kilograms * 2.20462; // Convert kilograms to pounds
+                if (!isNaN(kilograms)) {
+                    result = kilograms * 2.20462; // Convert kilograms to pounds
+                }
             } else if (conversionType === 'volume') {
                 const liters = parseFloat(document.getElementById('liters').value);
-                result = liters * 0.264172; // Convert liters to gallons
+                if (!isNaN(liters)) {
+                    result = liters * 0.264172; // Convert liters to gallons
+                }
             }
 
             document.getElementById('result').innerText = `Result: ${result.toFixed(2)}`;
+        }
+
+        function resetForm() {
+            document.getElementById('result').innerText = '';
         }
 
         function copyEmbedCode() {
@@ -140,10 +184,12 @@
         function showToast() {
             const toast = document.getElementById('toast');
             toast.className = 'show';
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
         }
 
-        updateFormFields();
+        document.addEventListener('DOMContentLoaded', updateFormFields);
     </script>
 </body>
 </html>
