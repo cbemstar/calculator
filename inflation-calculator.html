@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inflation Calculator</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            width: 100%;
+            margin: 20px auto;
+        }
+        .calc-container, .embed-container {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 300px;
+            box-sizing: border-box;
+        }
+        .calc-container {
+            order: 1;
+        }
+
+        .text-area{
+            height: 15vh;
+        }
+
+        .embed-container {
+            order: 2;
+            position: sticky;
+            top: 20px;
+            height: 100%;
+        }
+        h2, h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        label, input, select, button, textarea {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #000;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #444;
+        }
+        .calc-result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .embed-container h2 {
+            font-size: 1.2rem;
+        }
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+        @media (max-width: 991px) {
+            .calc-container, .embed-container {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calc-container">
+            <h1>Inflation Calculator</h1>
+            <form id="inflationCalculatorForm" onsubmit="calculateInflation(event)">
+                <label for="initialAmount">Initial Amount:</label>
+                <input type="text" id="initialAmount" class="calc-input" required oninput="formatNumber(this)">
+
+                <label for="inflationRate">Annual Inflation Rate (%):</label>
+                <input type="number" step="0.01" id="inflationRate" class="calc-input" required>
+
+                <label for="years">Number of Years:</label>
+                <input type="number" id="years" class="calc-input" required>
+
+                <div>
+                    <button type="button" class="calc-button" onclick="resetForm()">Reset</button>
+                    <button type="submit" class="calc-button">Calculate</button>
+                </div>
+            </form>
+            <div class="calc-result" id="result">
+                <p>Future Value: <span id="futureValue">0.00</span></p>
+            </div>
+        </div>
+        <div class="embed-container">
+            <h2>Embed Inflation Calculator</h2>
+            <textarea class = "text-area"readonly>
+<iframe src="https://cbemstar.github.io/calculator/inflation-calculator.html" width="100%" height="600" frameborder="0"></iframe>
+            </textarea>
+            <button class="copy-button" onclick="copyEmbedCode()">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(input) {
+            const value = input.value.replace(/\D/g, '');
+            input.value = Number(value).toLocaleString();
+        }
+
+        function resetForm() {
+            document.getElementById('inflationCalculatorForm').reset();
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function calculateInflation(event) {
+            event.preventDefault();
+
+            const initialAmount = parseFloat(document.getElementById('initialAmount').value.replace(/,/g, ''));
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
+            const years = parseInt(document.getElementById('years').value);
+
+            if (isNaN(initialAmount) || isNaN(inflationRate) || isNaN(years)) {
+                alert("Please enter valid values.");
+                return;
+            }
+
+            const futureValue = initialAmount * Math.pow((1 + inflationRate), years);
+            document.getElementById('futureValue').textContent = futureValue.toFixed(2);
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function copyEmbedCode() {
+            const embedCode = document.querySelector('.embed-container textarea');
+            embedCode.select();
+            embedCode.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+
+            alert("Embed code copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
