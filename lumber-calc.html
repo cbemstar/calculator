@@ -15,6 +15,14 @@
             min-height: 100vh;
         }
 
+        #embedCode {
+            height: 20vh;
+        }
+
+        .embed-container {
+            height: 100%;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -25,7 +33,7 @@
             justify-content: space-between;
         }
 
-        .calc-container, .embed-container {
+        .column {
             background-color: #fff;
             padding: 20px;
             border: 1px solid #ddd;
@@ -36,7 +44,7 @@
         }
 
         @media (max-width: 768px) {
-            .calc-container, .embed-container {
+            .column {
                 width: 100%;
                 margin-bottom: 20px;
             }
@@ -45,49 +53,33 @@
         h3 {
             font-size: 1.5rem;
             margin-bottom: 20px;
+            color: #333;
         }
 
-        label, input, button {
+        label, input, select, button, textarea {
             display: block;
-            margin-bottom: 10px;
             width: 100%;
-        }
-
-        input {
-            padding: 10px 20px; /* Equal padding on both sides */
+            padding: 10px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
         }
 
         button {
-            background-color: #000;
-            border: none;
+            background-color: black;
             color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 16px;
             cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
             transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #333;
+            background-color: #36454f;
         }
 
         #result {
-            font-weight: bold;
             margin-top: 20px;
-            text-align: center;
-        }
-
-        #embed-code {
-            width: 100%;
-            height: 150px;
-            margin-bottom: 10px;
-            resize: none;
+            font-weight: bold;
         }
 
         #toast {
@@ -96,13 +88,14 @@
             background-color: #333;
             color: #fff;
             text-align: center;
-            border-radius: 2px;
+            border-radius: 5px;
             padding: 16px;
             position: fixed;
             z-index: 1;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
+            transition: all 0.5s ease;
         }
 
         #toast.show {
@@ -119,16 +112,17 @@
             from { bottom: 30px; opacity: 1; }
             to { bottom: 0; opacity: 0; }
         }
+
+        /* Smaller font-size for Embed Code heading */
+        .embed-container h3 {
+            font-size: 1.2rem;
+            
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="embed-container">
-            <h3>Embed Code</h3>
-            <textarea id="embed-code" readonly><iframe src="https://cbemstar.github.io/calculator/lumber-calc.html" width="100%" height="600" frameborder="0"></iframe></textarea>
-            <button onclick="copyEmbedCode()">Copy Embed Code</button>
-        </div>
-        <div class="calc-container">
+        <div class="column calc-container">
             <h3>Lumber Calculator</h3>
             <form id="lumberCalculatorForm">
                 <label for="length">Length (feet):</label>
@@ -147,6 +141,13 @@
                 <button type="reset">Reset</button>
             </form>
             <div id="result"></div>
+        </div>
+        <div class="column embed-container">
+            <h3>Embed Code</h3>
+            <textarea id="embedCode" readonly>
+<iframe src="https://cbemstar.github.io/calculator/lumber-calc.html" width="100%" height="600" frameborder="0"></iframe>
+            </textarea>
+            <button onclick="copyEmbedCode()">Copy Embed Code</button>
         </div>
     </div>
     <div id="toast">Embed code copied to clipboard!</div>
@@ -167,7 +168,7 @@
         }
 
         function copyEmbedCode() {
-            const embedCode = document.getElementById('embed-code');
+            const embedCode = document.getElementById('embedCode');
             embedCode.select();
             document.execCommand('copy');
             showToast();
