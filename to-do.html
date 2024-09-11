@@ -3,14 +3,129 @@
 <head>
     <title>To-Do List</title>
     <style>
-        /* ... (existing styles) ... */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px; 
+            background-color: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+        }
+
+        .input-container input, .input-container button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #taskList {
+            padding: 0;
+            margin-top: 30px; 
+        }
+
+        #taskList li {
+            list-style: none;
+            padding: 20px; 
+            margin-bottom: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 5px; 
+        }
+
+        #taskList li .task-details {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        #taskList li .task-details span {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px; 
+        }
+
+        #taskList li.completed {
+            text-decoration: line-through;
+            color: #aaa;
+            background-color: #f0f0f0;
+        }
+
+        .delete-button, .complete-button, .comments-button {
+            cursor: pointer;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .complete-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .comments-button {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        .comments-container {
+            margin-top: 15px; 
+            width: 100%; 
+        }
+
+        .comments-container textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .client-group {
+            margin-bottom: 20px; 
+        }
+
+        .client-group h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body onload="loadTasks()"> 
     <h1>To-Do List</h1>
 
     <div class="input-container">
-        </div>
+        <input type="text" id="clientName" placeholder="Client Name">
+        <input type="text" id="jobNumber" placeholder="Job Number">
+        <input type="text" id="taskDescription" placeholder="Task Description">
+        <input type="text" id="reminder" placeholder="Reminder (optional)">
+        <button onclick="addTask()">Add Task</button>
+    </div>
 
     <ul id="taskList"></ul>
 
@@ -18,7 +133,10 @@
         const taskList = document.getElementById('taskList');
 
         function addTask() {
-            // ... (get input values) ... 
+            const clientName = document.getElementById('clientName').value;
+            const jobNumber = document.getElementById('jobNumber').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+            const reminder = document.getElementById('reminder').value;
 
             const task = {
                 clientName: clientName,
@@ -33,14 +151,20 @@
             tasks.push(task);
             saveTasks(tasks);
 
-            renderTasks(); // Re-render the task list
+            renderTasks(); 
 
-            // ... (clear input fields) ... 
+            // Clear input fields
+            document.getElementById('clientName').value = '';
+            document.getElementById('jobNumber').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('reminder').value = '';
+
+            // TODO: Implement reminder functionality (if needed)
         }
 
         function deleteTask(button) {
             const tasks = getTasks();
-            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement);
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement); 
             tasks.splice(taskIndex, 1);
             saveTasks(tasks);
             renderTasks();
@@ -48,14 +172,14 @@
 
         function completeTask(button) {
             const tasks = getTasks();
-            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement);
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement); 
             tasks[taskIndex].completed = !tasks[taskIndex].completed;
             saveTasks(tasks);
             renderTasks();
         }
 
         function toggleComments(button) {
-            const commentsContainer = button.nextElementSibling;
+            const commentsContainer = button.parentElement.nextElementSibling; 
             commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
         }
 
@@ -69,22 +193,42 @@
         }
 
         function renderTasks() {
-            taskList.innerHTML = ''; // Clear the list
+            taskList.innerHTML = ''; 
             const tasks = getTasks();
-            tasks.forEach((task, index) => {
+
+            let currentClient = null;
+            let rowNumber = 1;
+
+            tasks.forEach((task) => {
+                if (task.clientName !== currentClient) {
+                    currentClient = task.clientName;
+                    rowNumber = 1;
+
+                    const clientGroup = document.createElement('div');
+                    clientGroup.classList.add('client-group');
+                    clientGroup.innerHTML = `<h3>${currentClient}</h3>`;
+                    taskList.appendChild(clientGroup);
+                }
+
                 const li = document.createElement('li');
                 li.classList.toggle('completed', task.completed);
                 li.innerHTML = `
-                    ${task.taskDescription} 
-                    (Client: ${task.clientName}, Job: ${task.jobNumber}) 
-                    <button class="complete-button" onclick="completeTask(this)">Complete</button>
-                    <button class="delete-button" onclick="deleteTask(this)">Delete</button>
-                    <button class="comments-button" onclick="toggleComments(this)">Comments</button>
+                    <div class="task-details">
+                        <span> ${rowNumber}. ${task.taskDescription}</span>
+                        <span>Job: ${task.jobNumber}</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="complete-button" onclick="completeTask(this)">Complete</button>
+                        <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                        <button class="comments-button" onclick="toggleComments(this)">Comments</button>
+                    </div>
                     <div class="comments-container">
-                        <textarea placeholder="Add comments here..." onblur="saveComments(this, ${index})">${task.comments}</textarea>
+                        <textarea placeholder="Add comments here..." onblur="saveComments(this, ${tasks.indexOf(task)})">${task.comments}</textarea>
                     </div>
                 `;
-                taskList.appendChild(li);
+
+                taskList.lastChild.appendChild(li); 
+                rowNumber++;
             });
         }
 
