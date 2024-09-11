@@ -1,87 +1,16 @@
-
+<!DOCTYPE html>
 <html>
 <head>
     <title>To-Do List</title>
     <style>
-        body {
-            font-family: sans-serif;
-        }
-
-        .input-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .input-container input, .input-container button {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        #taskList li {
-            list-style: none;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #taskList li.completed {
-            text-decoration: line-through;
-            color: #aaa;
-        }
-
-        .delete-button, .complete-button, .comments-button {
-            cursor: pointer;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            margin-left: 10px;
-        }
-
-        .delete-button {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .complete-button {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .comments-button {
-            background-color: #008CBA;
-            color: white;
-        }
-
-        .comments-container {
-            margin-top: 10px;
-            display: none; /* Initially hide comments */
-        }
-
-        .comments-container textarea {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            resize: vertical;
-        }
+        /* ... (existing styles) ... */
     </style>
 </head>
-<body>
+<body onload="loadTasks()"> 
     <h1>To-Do List</h1>
 
     <div class="input-container">
-        <input type="text" id="clientName" placeholder="Client Name">
-        <input type="text" id="jobNumber" placeholder="Job Number">
-        <input type="text" id="taskDescription" placeholder="Task Description">
-        <input type="text" id="reminder" placeholder="Reminder (optional)">
-        <button onclick="addTask()">Add Task</button>
-    </div>
+        </div>
 
     <ul id="taskList"></ul>
 
@@ -89,44 +18,84 @@
         const taskList = document.getElementById('taskList');
 
         function addTask() {
-            const clientName = document.getElementById('clientName').value;
-            const jobNumber = document.getElementById('jobNumber').value;
-            const taskDescription = document.getElementById('taskDescription').value;
-            const reminder = document.getElementById('reminder').value;
+            // ... (get input values) ... 
 
-            const li = document.createElement('li');
-            li.innerHTML = `
-                ${taskDescription} 
-                (Client: ${clientName}, Job: ${jobNumber}) 
-                <button class="complete-button" onclick="completeTask(this)">Complete</button>
-                <button class="delete-button" onclick="deleteTask(this)">Delete</button>
-                <button class="comments-button" onclick="toggleComments(this)">Comments</button>
-                <div class="comments-container">
-                    <textarea placeholder="Add comments here..."></textarea>
-                </div>
-            `;
-            taskList.appendChild(li);
+            const task = {
+                clientName: clientName,
+                jobNumber: jobNumber,
+                taskDescription: taskDescription,
+                reminder: reminder,
+                completed: false,
+                comments: "" 
+            };
 
-            // Clear input fields
-            document.getElementById('clientName').value = '';
-            document.getElementById('jobNumber').value = '';
-            document.getElementById('taskDescription').value = '';
-            document.getElementById('reminder').value = '';
+            const tasks = getTasks();
+            tasks.push(task);
+            saveTasks(tasks);
 
-            // TODO: Implement reminder functionality (if needed)
+            renderTasks(); // Re-render the task list
+
+            // ... (clear input fields) ... 
         }
 
         function deleteTask(button) {
-            button.parentElement.remove();
+            const tasks = getTasks();
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement);
+            tasks.splice(taskIndex, 1);
+            saveTasks(tasks);
+            renderTasks();
         }
 
         function completeTask(button) {
-            button.parentElement.classList.toggle('completed');
+            const tasks = getTasks();
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement);
+            tasks[taskIndex].completed = !tasks[taskIndex].completed;
+            saveTasks(tasks);
+            renderTasks();
         }
 
         function toggleComments(button) {
             const commentsContainer = button.nextElementSibling;
             commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function getTasks() {
+            const tasksJSON = localStorage.getItem('tasks');
+            return tasksJSON ? JSON.parse(tasksJSON) : [];
+        }
+
+        function saveTasks(tasks) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = ''; // Clear the list
+            const tasks = getTasks();
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.classList.toggle('completed', task.completed);
+                li.innerHTML = `
+                    ${task.taskDescription} 
+                    (Client: ${task.clientName}, Job: ${task.jobNumber}) 
+                    <button class="complete-button" onclick="completeTask(this)">Complete</button>
+                    <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                    <button class="comments-button" onclick="toggleComments(this)">Comments</button>
+                    <div class="comments-container">
+                        <textarea placeholder="Add comments here..." onblur="saveComments(this, ${index})">${task.comments}</textarea>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        function saveComments(textarea, taskIndex) {
+            const tasks = getTasks();
+            tasks[taskIndex].comments = textarea.value;
+            saveTasks(tasks);
+        }
+
+        function loadTasks() {
+            renderTasks();
         }
 
     </script>
