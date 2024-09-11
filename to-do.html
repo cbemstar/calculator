@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>To-Do List</title>
+    <title>To-Do List with Timer</title>
     <style>
         body {
             font-family: sans-serif;
@@ -96,6 +96,12 @@
             color: white;
         }
 
+        .play-pause-button {
+            background-color: #FFC107;
+            color: white;
+            margin-right: 10px;
+        }
+
         .comments-button {
             background-color: #008CBA;
             color: white;
@@ -131,14 +137,20 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-bottom: 20px; 
-            width: 100%; /* Make search bar full width */
-            box-sizing: border-box; /* Include padding and border in width */
+            margin-bottom: 20px;
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .timer {
+            font-size: 14px;
+            color: #777;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body onload="loadTasks()">
-    <h1>To-Do List</h1>
+    <h1>To-Do List with Timer</h1>
 
     <input type="text" id="searchInput" placeholder="Search tasks...">
 
@@ -146,6 +158,8 @@
         <input type="text" id="clientName" placeholder="Client Name">
         <input type="text" id="jobNumber" placeholder="Job Number">
         <input type="text" id="taskDescription" placeholder="Task Description">
+        <input type="text" id="accountManager" placeholder="Account Manager">
+        <input type="email" id="accountManagerEmail" placeholder="Account Manager Email">
         <input type="text" id="reminder" placeholder="Reminder (optional)">
         <button onclick="addTask()">Add Task</button>
     </div>
@@ -153,169 +167,245 @@
     <ul id="taskList"></ul>
 
     <script>
-       const taskList = document.getElementById('taskList');
-const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', filterTasks);
+        const taskList = document.getElementById('taskList');
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', filterTasks);
 
-function addTask() {
-    const clientName = document.getElementById('clientName').value;
-    const jobNumber = document.getElementById('jobNumber').value;
-    const taskDescription = document.getElementById('taskDescription').value;
-    const reminder = document.getElementById('reminder').value;
+        let timers = {};
 
-    const task = {
-        clientName: clientName,
-        jobNumber: jobNumber,
-        taskDescription: taskDescription,
-        reminder: reminder,
-        completed: false,
-        comments: "" 
-    };
+        function addTask() {
+            const clientName = document.getElementById('clientName').value;
+            const jobNumber = document.getElementById('jobNumber').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+            const accountManager = document.getElementById('accountManager').value;
+            const accountManagerEmail = document.getElementById('accountManagerEmail').value;
+            const reminder = document.getElementById('reminder').value;
 
-    const tasks = getTasks();
-    tasks.push(task);
-    saveTasks(tasks);
+            const task = {
+                clientName: clientName,
+                jobNumber: jobNumber,
+                taskDescription: taskDescription,
+                accountManager: accountManager,
+                accountManagerEmail: accountManagerEmail,
+                reminder: reminder,
+                completed: false,
+                comments: "",
+                timeSpent: 0,
+                timerRunning: false
+            };
 
-    renderTasks(); 
+            const tasks = getTasks();
+            tasks.push(task);
+            saveTasks(tasks);
 
-    // Clear input fields
-    document.getElementById('clientName').value = '';
-    document.getElementById('jobNumber').value = '';
-    document.getElementById('taskDescription').value = '';
-    document.getElementById('reminder').value = '';
+            renderTasks();
 
-    // TODO: Implement reminder functionality (if needed)
-}
-
-function deleteTask(button) {
-    const tasks = getTasks();
-    const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement); 
-    tasks.splice(taskIndex, 1);
-    saveTasks(tasks);
-    renderTasks();
-}
-
-function completeTask(button) {
-    const tasks = getTasks();
-    const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement); 
-    tasks[taskIndex].completed = !tasks[taskIndex].completed;
-    saveTasks(tasks);
-    renderTasks();
-}
-
-function toggleComments(button) {
-    const commentsContainer = button.parentElement.nextElementSibling; 
-    commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function getTasks() {
-    const tasksJSON = localStorage.getItem('tasks');
-    return tasksJSON ? JSON.parse(tasksJSON) : [];
-}
-
-function saveTasks(tasks) {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function renderTasks() {
-    taskList.innerHTML = ''; 
-    const tasks = getTasks();
-
-    let currentClient = null;
-    let rowNumber = 1;
-
-    tasks.forEach((task) => {
-        if (task.clientName !== currentClient) {
-            currentClient = task.clientName;
-            rowNumber = 1;
-
-            const clientGroup = document.createElement('div');
-            clientGroup.classList.add('client-group');
-            clientGroup.innerHTML = `<h3>${currentClient}</h3>`;
-            taskList.appendChild(clientGroup);
+            // Clear input fields
+            document.getElementById('clientName').value = '';
+            document.getElementById('jobNumber').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('accountManager').value = '';
+            document.getElementById('accountManagerEmail').value = '';
+            document.getElementById('reminder').value = '';
         }
 
-        const li = document.createElement('li');
-        li.classList.toggle('completed', task.completed);
-        li.innerHTML = `
-            <div class="task-details">
-                <span> ${rowNumber}. ${task.taskDescription}</span>
-                <span>Job: ${task.jobNumber}</span>
-            </div>
-            <div class="task-actions">
-                <button class="complete-button" onclick="completeTask(this)">Complete</button>
-                <button class="delete-button" onclick="deleteTask(this)">Delete</button>
-                <button class="comments-button" onclick="toggleComments(this)">Comments</button>
-            </div>
-            <div class="comments-container">
-                <textarea placeholder="Add comments here..." onblur="saveComments(this, ${tasks.indexOf(task)})">${task.comments}</textarea>
-            </div>
-        `;
+        function deleteTask(button) {
+            const tasks = getTasks();
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement);
+            tasks.splice(taskIndex, 1);
+            saveTasks(tasks);
+            renderTasks();
+        }
 
-        taskList.lastChild.appendChild(li); 
-        rowNumber++;
-    });
-}
+        function completeTask(button) {
+            const tasks = getTasks();
+            const taskIndex = Array.from(taskList.children).indexOf(button.parentElement.parentElement.parentElement);
+            tasks[taskIndex].completed = true;
+            tasks[taskIndex].timerRunning = false;
+            clearInterval(timers[taskIndex]);
 
-function saveComments(textarea, taskIndex) {
-    const tasks = getTasks();
-    tasks[taskIndex].comments = textarea.value;
-    saveTasks(tasks);
-}
+            saveTasks(tasks);
+            renderTasks();
 
-function loadTasks() {
-    renderTasks();
-}
+            // Send email with task details and final time
+            const completedTask = tasks[taskIndex];
+            const formattedTime = formatTime(completedTask.timeSpent);
+            console.log(`Sending email to ${completedTask.accountManagerEmail}: Task "${completedTask.taskDescription}" is complete! Total time: ${formattedTime}`);
+        }
 
-function filterTasks() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const tasks = getTasks();
+        function toggleComments(button) {
+            const commentsContainer = button.parentElement.nextElementSibling;
+            commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
+        }
 
-    taskList.innerHTML = '';
+        function getTasks() {
+            const tasksJSON = localStorage.getItem('tasks');
+            return tasksJSON ? JSON.parse(tasksJSON) : [];
+        }
 
-    let currentClient = null;
-    let rowNumber = 1;
+        function saveTasks(tasks) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
 
-    tasks.forEach((task) => {
-        if (
-            task.clientName.toLowerCase().includes(searchTerm) ||
-            task.jobNumber.toLowerCase().includes(searchTerm) ||
-            task.taskDescription.toLowerCase().includes(searchTerm) ||
-            task.reminder.toLowerCase().includes(searchTerm) ||
-            task.comments.toLowerCase().includes(searchTerm)
-        ) {
-            if (task.clientName !== currentClient) {
-                currentClient = task.clientName;
-                rowNumber = 1;
+        function renderTasks() {
+            taskList.innerHTML = '';
+            const tasks = getTasks();
 
-                const clientGroup = document.createElement('div');
-                clientGroup.classList.add('client-group');
-                clientGroup.innerHTML = `<h3>${currentClient}</h3>`;
-                taskList.appendChild(clientGroup);
+            let currentClient = null;
+            let rowNumber = 1;
+
+            tasks.forEach((task, index) => {
+                if (task.clientName !== currentClient) {
+                    currentClient = task.clientName;
+                    rowNumber = 1;
+
+                    const clientGroup = document.createElement('div');
+                    clientGroup.classList.add('client-group');
+                    clientGroup.innerHTML = `<h3>${currentClient}</h3>`;
+                    taskList.appendChild(clientGroup);
+                }
+
+                const li = document.createElement('li');
+                li.classList.toggle('completed', task.completed);
+                li.innerHTML = `
+                    <div class="task-details">
+                        <span>${rowNumber}. ${task.taskDescription}</span>
+                        <span>Job: ${task.jobNumber}</span>
+                        <span class="account-manager">
+                            Account Manager: ${task.accountManager}
+                            <span class="timer" id="timer-${index}">${formatTime(task.timeSpent)}</span>
+                        </span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="play-pause-button" onclick="toggleTimer(${index})">${task.timerRunning ? 'Pause' : 'Play'}</button>
+                        <button class="complete-button" onclick="completeTask(this)" ${task.completed ? 'disabled' : ''}>Complete</button>
+                        <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                        <button class="comments-button" onclick="toggleComments(this)">Comments</button>
+                    </div>
+                    <div class="comments-container" style="display: none;">
+                        <textarea placeholder="Add comments here..." onblur="saveComments(this, ${index})">${task.comments}</textarea>
+                    </div>
+                `;
+
+                taskList.lastChild.appendChild(li);
+
+                if (task.timerRunning && !task.completed) {
+                    startTimer(index);
+                }
+
+                rowNumber++;
+            });
+        }
+
+        function saveComments(textarea, taskIndex) {
+            const tasks = getTasks();
+            tasks[taskIndex].comments = textarea.value;
+            saveTasks(tasks);
+        }
+
+        function loadTasks() {
+            renderTasks();
+        }
+
+        function filterTasks() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const tasks = getTasks();
+
+            taskList.innerHTML = '';
+
+            let currentClient = null;
+            let rowNumber = 1;
+
+            tasks.forEach((task, index) => {
+                if (
+                    task.clientName.toLowerCase().includes(searchTerm) ||
+                    task.jobNumber.toLowerCase().includes(searchTerm) ||
+                    task.taskDescription.toLowerCase().includes(searchTerm) ||
+                    task.reminder.toLowerCase().includes(searchTerm) ||
+                    task.comments.toLowerCase().includes(searchTerm) ||
+                    task.accountManager.toLowerCase().includes(searchTerm) ||
+                    task.accountManagerEmail.toLowerCase().includes(searchTerm)
+                ) {
+                    if (task.clientName !== currentClient) {
+                        currentClient = task.clientName;
+                        rowNumber = 1;
+
+                        const clientGroup = document.createElement('div');
+                        clientGroup.classList.add('client-group');
+                        clientGroup.innerHTML = `<h3>${currentClient}</h3>`;
+                        taskList.appendChild(clientGroup);
+                    }
+
+                    const li = document.createElement('li');
+                    li.classList.toggle('completed', task.completed);
+                    li.innerHTML = `
+                        <div class="task-details">
+                            <span>${rowNumber}. ${task.taskDescription}</span>
+                            <span>Job: ${task.jobNumber}</span>
+                            <span class="account-manager">
+                                Account Manager: ${task.accountManager}
+                                <span class="timer" id="timer-${index}">${formatTime(task.timeSpent)}</span>
+                            </span>
+                        </div>
+                        <div class="task-actions">
+                            <button class="play-pause-button" onclick="toggleTimer(${index})">${task.timerRunning ? 'Pause' : 'Play'}</button>
+                            <button class="complete-button" onclick="completeTask(this)" ${task.completed ? 'disabled' : ''}>Complete</button>
+                            <button class="delete-button" onclick="deleteTask(this)">Delete</button>
+                            <button class="comments-button" onclick="toggleComments(this)">Comments</button>
+                        </div>
+                        <div class="comments-container" style="display: none;">
+                            <textarea placeholder="Add comments here..." onblur="saveComments(this, ${index})">${task.comments}</textarea>
+                        </div>
+                    `;
+
+                    taskList.lastChild.appendChild(li);
+
+                    if (task.timerRunning && !task.completed) {
+                        startTimer(index);
+                    }
+
+                    rowNumber++;
+                }
+            });
+        }
+
+        function toggleTimer(taskIndex) {
+            const tasks = getTasks();
+            const task = tasks[taskIndex];
+
+            if (task.timerRunning) {
+                clearInterval(timers[taskIndex]);
+                task.timerRunning = false;
+            } else {
+                startTimer(taskIndex);
+                task.timerRunning = true;
             }
 
-            const li = document.createElement('li');
-            li.classList.toggle('completed', task.completed);
-            li.innerHTML = `
-                <div class="task-details">
-                    <span> ${rowNumber}. ${task.taskDescription}</span>
-                    <span>Job: ${task.jobNumber}</span>
-                </div>
-                <div class="task-actions">
-                    <button class="complete-button" onclick="completeTask(this)">Complete</button>
-                    <button class="delete-button" onclick="deleteTask(this)">Delete</button>
-                    <button class="comments-button" onclick="toggleComments(this)">Comments</button>
-                </div>
-                <div class="comments-container">
-                    <textarea placeholder="Add comments here..." onblur="saveComments(this, ${tasks.indexOf(task)})">${task.comments}</textarea>
-                </div>
-            `;
-
-            taskList.lastChild.appendChild(li);
-            rowNumber++;
+            saveTasks(tasks);
+            renderTasks();
         }
-    });
-}
+
+        function startTimer(taskIndex) {
+            const tasks = getTasks();
+            const timerDisplay = document.getElementById(`timer-${taskIndex}`);
+
+            timers[taskIndex] = setInterval(() => {
+                tasks[taskIndex].timeSpent++;
+                timerDisplay.textContent = formatTime(tasks[taskIndex].timeSpent);
+                saveTasks(tasks);
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = seconds % 60;
+            return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
+        }
+
+        function pad(number) {
+            return (number < 10 ? '0' : '') + number;
+        }
     </script>
 </body>
 </html>
