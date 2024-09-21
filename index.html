@@ -2,183 +2,348 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Calculator</title>
+    <title>Scientific Calculator</title>
     <style>
-        .calculator-body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding: 2%;
-            background-color: #fff;
+        /* Reset */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            font-family: Arial, sans-serif;
+            padding: 0;
         }
 
+        /* Body */
+        body {
+            background-color: #000;
+            font-family: 'Helvetica Neue', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #f0f0f0;
+        }
+
+        /* Calculator Container */
         .calculator {
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 2%;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .display {
-            background-color: #f1f3f4;
-            border-radius: 5px;
-            padding: 15px;
-            text-align: right;
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #333;
-            height: 60px;
+            width: 400px;
+            border-radius: 20px;
             overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 2px solid #DDFF00;
+            background-color: transparent;
         }
 
+        /* Display */
+        .display {
+            background-color: #000;
+            color: #fff;
+            text-align: right;
+            padding: 20px;
+            font-size: 40px;
+            word-wrap: break-word;
+            min-height: 80px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        /* Buttons Grid */
         .buttons {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .button {
-            background-color: #f1f3f4;
-            border: none;
-            border-radius: 5px;
-            padding: 20px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            user-select: none;
-        }
-
-        .button:active {
-            background-color: #ddd;
-        }
-
-        .operator {
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 3px;
             background-color: #000;
+            padding: 3px;
+        }
+
+        /* Button Styles */
+        .btn {
+            background-color: #333;
+            color: #fff;
+            font-size: 24px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.1s;
+            border-radius: 30px;
+        }
+
+        .btn:hover {
+            background-color: #444;
+        }
+
+        .btn:active {
+            background-color: #555;
+        }
+
+        /* Specific Button Styles */
+        .btn.function {
+            background-color: #a5a5a5;
+            color: #000;
+        }
+
+        .btn.operator {
+            background-color: #6cc551;
             color: #fff;
         }
 
-        .operator:active {
-            background-color: #2c6bc9;
+        .btn.scientific {
+            background-color: #1c1c1c;
+            color: #6cc551;
         }
 
-        @media (max-width: 600px) {
+        .btn.zero {
+            grid-column: span 2;
+            justify-content: flex-start;
+            padding-left: 28px;
+        }
+
+        /* Adjustments for Small Screens */
+        @media (max-width: 400px) {
             .calculator {
-                padding: 10px;
-                max-width: 100%;
+                width: 100%;
+                margin: 10px;
             }
 
             .display {
-                padding: 10px;
-                font-size: 1.5em;
+                font-size: 32px;
             }
 
-            .button {
-                padding: 15px;
-                font-size: 1em;
+            .btn {
+                height: 50px;
+                font-size: 20px;
             }
         }
     </style>
 </head>
-<body class="calculator-body">
+<body>
     <div class="calculator">
         <div class="display" id="display">0</div>
         <div class="buttons">
-            <button class="button" onclick="clearDisplay()">AC</button>
-            <button class="button" onclick="deleteDigit()">⌫</button>
-            <button class="button operator" onclick="appendOperator('/')">/</button>
-            <button class="button operator" onclick="appendOperator('*')">*</button>
-            <button class="button" onclick="appendDigit('7')">7</button>
-            <button class="button" onclick="appendDigit('8')">8</button>
-            <button class="button" onclick="appendDigit('9')">9</button>
-            <button class="button operator" onclick="appendOperator('-')">-</button>
-            <button class="button" onclick="appendDigit('4')">4</button>
-            <button class="button" onclick="appendDigit('5')">5</button>
-            <button class="button" onclick="appendDigit('6')">6</button>
-            <button class="button operator" onclick="appendOperator('+')">+</button>
-            <button class="button" onclick="appendDigit('1')">1</button>
-            <button class="button" onclick="appendDigit('2')">2</button>
-            <button class="button" onclick="appendDigit('3')">3</button>
-            <button class="button operator" onclick="calculate()">=</button>
-            <button class="button" onclick="appendDigit('0')" style="grid-column: span 2;">0</button>
-            <button class="button" onclick="appendDecimal()">.</button>
+            <!-- Row 1 -->
+            <button class="btn function" data-action="clear">AC</button>
+            <button class="btn function" data-action="plus-minus">±</button>
+            <button class="btn function" data-action="percent">%</button>
+            <button class="btn operator" data-action="divide">÷</button>
+            <button class="btn operator" data-action="power">xʸ</button>
+            <!-- Row 2 -->
+            <button class="btn scientific" data-action="sin">sin</button>
+            <button class="btn scientific" data-action="cos">cos</button>
+            <button class="btn scientific" data-action="tan">tan</button>
+            <button class="btn operator" data-action="multiply">×</button>
+            <button class="btn operator" data-action="sqrt">√</button>
+            <!-- Row 3 -->
+            <button class="btn number" data-number="7">7</button>
+            <button class="btn number" data-number="8">8</button>
+            <button class="btn number" data-number="9">9</button>
+            <button class="btn operator" data-action="subtract">−</button>
+            <button class="btn scientific" data-action="log">log</button>
+            <!-- Row 4 -->
+            <button class="btn number" data-number="4">4</button>
+            <button class="btn number" data-number="5">5</button>
+            <button class="btn number" data-number="6">6</button>
+            <button class="btn operator" data-action="add">+</button>
+            <button class="btn scientific" data-action="ln">ln</button>
+            <!-- Row 5 -->
+            <button class="btn number" data-number="1">1</button>
+            <button class="btn number" data-number="2">2</button>
+            <button class="btn number" data-number="3">3</button>
+            <button class="btn operator" data-action="equals">=</button>
+            <button class="btn scientific" data-action="exp">eˣ</button>
+            <!-- Row 6 -->
+            <button class="btn zero number" data-number="0">0</button>
+            <button class="btn number" data-number=".">.</button>
+            <button class="btn scientific" data-action="pi">π</button>
+            <button class="btn scientific" data-action="factorial">n!</button>
+            <button class="btn scientific" data-action="inv">1/x</button>
         </div>
     </div>
+
     <script>
-        let display = document.getElementById('display');
-        let currentInput = '0';
-        let memory = 0;
-        let operator = null;
+        // Get elements
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('.btn');
 
-        function updateDisplay() {
-            display.textContent = currentInput;
-        }
+        // Calculator state
+        let firstOperand = null;
+        let secondOperand = null;
+        let currentOperator = null;
+        let shouldResetDisplay = false;
 
-        function clearDisplay() {
-            currentInput = '0';
-            memory = 0;
-            operator = null;
-            updateDisplay();
-        }
+        // Button click event
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const { action, number } = button.dataset;
 
-        function deleteDigit() {
-            currentInput = currentInput.slice(0, -1) || '0';
-            updateDisplay();
-        }
+                if (number !== undefined) {
+                    appendNumber(number);
+                } else if (action !== undefined) {
+                    handleAction(action);
+                }
+            });
+        });
 
-        function appendDigit(digit) {
-            if (currentInput === '0') {
-                currentInput = digit;
+        // Append number to display
+        function appendNumber(number) {
+            if (display.textContent === '0' || shouldResetDisplay) {
+                display.textContent = number;
+                shouldResetDisplay = false;
             } else {
-                currentInput += digit;
+                if (number === '.' && display.textContent.includes('.')) return;
+                display.textContent += number;
             }
-            updateDisplay();
         }
 
-        function appendOperator(op) {
-            if (operator !== null) {
+        // Handle action buttons
+        function handleAction(action) {
+            switch (action) {
+                case 'clear':
+                    clearCalculator();
+                    break;
+                case 'plus-minus':
+                    toggleSign();
+                    break;
+                case 'percent':
+                    convertPercent();
+                    break;
+                case 'divide':
+                case 'multiply':
+                case 'subtract':
+                case 'add':
+                case 'power':
+                    setOperator(action);
+                    break;
+                case 'equals':
+                    calculate();
+                    break;
+                case 'sin':
+                case 'cos':
+                case 'tan':
+                case 'log':
+                case 'ln':
+                case 'sqrt':
+                case 'exp':
+                case 'pi':
+                case 'factorial':
+                case 'inv':
+                    performScientificOperation(action);
+                    break;
+            }
+        }
+
+        // Clear calculator
+        function clearCalculator() {
+            display.textContent = '0';
+            firstOperand = null;
+            secondOperand = null;
+            currentOperator = null;
+            shouldResetDisplay = false;
+        }
+
+        // Toggle sign
+        function toggleSign() {
+            display.textContent = String(-parseFloat(display.textContent));
+        }
+
+        // Convert to percentage
+        function convertPercent() {
+            display.textContent = String(parseFloat(display.textContent) / 100);
+        }
+
+        // Set operator
+        function setOperator(operator) {
+            if (currentOperator !== null && !shouldResetDisplay) {
                 calculate();
             }
-            memory = parseFloat(currentInput);
-            operator = op;
-            currentInput = '0';
+            firstOperand = parseFloat(display.textContent);
+            currentOperator = operator;
+            shouldResetDisplay = true;
         }
 
-        function appendDecimal() {
-            if (!currentInput.includes('.')) {
-                currentInput += '.';
-            }
-            updateDisplay();
-        }
-
+        // Calculate result
         function calculate() {
+            if (currentOperator === null || shouldResetDisplay) return;
+            secondOperand = parseFloat(display.textContent);
             let result;
-            switch (operator) {
-                case '+':
-                    result = memory + parseFloat(currentInput);
+
+            switch (currentOperator) {
+                case 'add':
+                    result = firstOperand + secondOperand;
                     break;
-                case '-':
-                    result = memory - parseFloat(currentInput);
+                case 'subtract':
+                    result = firstOperand - secondOperand;
                     break;
-                case '*':
-                    result = memory * parseFloat(currentInput);
+                case 'multiply':
+                    result = firstOperand * secondOperand;
                     break;
-                case '/':
-                    result = memory / parseFloat(currentInput);
+                case 'divide':
+                    result = firstOperand / secondOperand;
                     break;
-                default:
-                    return;
+                case 'power':
+                    result = Math.pow(firstOperand, secondOperand);
+                    break;
             }
-            currentInput = result.toString();
-            operator = null;
-            updateDisplay();
+
+            display.textContent = String(result);
+            firstOperand = result;
+            currentOperator = null;
+            shouldResetDisplay = true;
+        }
+
+        // Perform scientific operations
+        function performScientificOperation(operation) {
+            let value = parseFloat(display.textContent);
+            let result;
+
+            switch (operation) {
+                case 'sin':
+                    result = Math.sin(value * Math.PI / 180); // Convert to radians
+                    break;
+                case 'cos':
+                    result = Math.cos(value * Math.PI / 180);
+                    break;
+                case 'tan':
+                    result = Math.tan(value * Math.PI / 180);
+                    break;
+                case 'log':
+                    result = Math.log10(value);
+                    break;
+                case 'ln':
+                    result = Math.log(value);
+                    break;
+                case 'sqrt':
+                    result = Math.sqrt(value);
+                    break;
+                case 'exp':
+                    result = Math.exp(value);
+                    break;
+                case 'pi':
+                    result = Math.PI;
+                    break;
+                case 'factorial':
+                    result = factorial(value);
+                    break;
+                case 'inv':
+                    result = 1 / value;
+                    break;
+            }
+
+            display.textContent = String(result);
+            shouldResetDisplay = true;
+        }
+
+        // Factorial function
+        function factorial(n) {
+            if (n < 0) return 'Error';
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
         }
     </script>
 </body>
