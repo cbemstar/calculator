@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image to WebP Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    img.preview { max-width: 120px; max-height: 120px; border-radius: 6px; }
+    @media (max-width: 768px) {
+      .max-w-xs {
+        max-width: 90%;
+      }
+      #controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+      }
+      #controls > div {
+        width: auto;
+        justify-content: flex-start;
+        padding: 1rem 1.5rem;
+        gap: 0.75rem;
+      }
+      #controls input {
+        font-size: 1rem;
+        flex-shrink: 0;
+        width: fit-content;
+      }
+      #controls label {
+        min-width: fit-content;
+        flex-shrink: 0;
+      }
+      #controls span {
+        flex-shrink: 0;
+      }
+      #drop-area {
+        margin: 0 1rem;
+        padding: 2rem 1.5rem;
+      }
+      #drop-area p {
+        font-size: 1rem;
+      }
+      #drop-area button {
+        width: 100%;
+        max-width: 250px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
+      .overflow-x-auto {
+        margin: 0 0.5rem;
+      }
+      #preview-table {
+        font-size: 0.875rem;
+      }
+      #preview-table th,
+      #preview-table td {
+        padding: 0.75rem 0.5rem;
+      }
+      img.preview {
+        max-width: 100px;
+        max-height: 100px;
+      }
+      .break-words {
+        word-break: break-all;
+      }
+    }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.75rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+      #controls > div {
+        max-width: 350px;
+        padding: 1.25rem 1rem;
+        gap: 0.5rem;
+      }
+      #controls input {
+        width: auto;
+        font-size: 0.95rem;
+      }
+      #controls label {
+        font-size: 0.95rem;
+        min-width: 80px;
+      }
+      #drop-area {
+        padding: 1.5rem 1rem;
+      }
+      #drop-area button {
+        max-width: 200px;
+        padding: 0.875rem 1.25rem;
+      }
+      #preview-table {
+        font-size: 0.8rem;
+      }
+      #preview-table th,
+      #preview-table td {
+        padding: 0.625rem 0.375rem;
+      }
+      img.preview {
+        max-width: 80px;
+        max-height: 80px;
+      }
+    }
+    @media (max-width: 360px) {
+      #controls > div {
+        max-width: 300px;
+        padding: 1rem 0.75rem;
+        gap: 0.375rem;
+      }
+      #controls input {
+        width: auto;
+        font-size: 0.9rem;
+      }
+      #controls label {
+        font-size: 0.9rem;
+        min-width: 70px;
+      }
+      img.preview {
+        max-width: 70px;
+        max-height: 70px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div id="controls" class="flex flex-wrap justify-center gap-4 mb-8">
+    <div class="bg-white rounded shadow px-3 py-2 flex items-center gap-2">
+      <label for="max-width" class="font-medium">Max Width:</label>
+      <input id="max-width" type="number" min="1" max="99999" value="99999" class="w-20 border rounded px-2 py-1 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+      <span class="text-gray-500">px</span>
+    </div>
+    <div class="bg-white rounded shadow px-3 py-2 flex items-center gap-2">
+      <label for="max-height" class="font-medium">Max Height:</label>
+      <input id="max-height" type="number" min="1" max="99999" value="99999" class="w-20 border rounded px-2 py-1 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+      <span class="text-gray-500">px</span>
+    </div>
+    <div class="bg-white rounded shadow px-3 py-2 flex items-center gap-2">
+      <label for="quality" class="font-medium">Quality:</label>
+      <input id="quality" type="number" min="0.1" max="1" step="0.01" value="0.95" class="w-20 border rounded px-2 py-1 text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+      <span class="text-gray-500">(0.1 - 1)</span>
+    </div>
+  </div>
+  <div id="drop-area" class="border-2 border-dashed border-blue-400 rounded-lg p-8 text-center text-blue-500 mb-8 bg-white shadow hover:shadow-lg transition-shadow cursor-pointer max-w-2xl mx-auto px-4">
+    <p class="mb-4">Drag & drop your image files here</p>
+    <input type="file" id="fileElem" accept="image/*" multiple style="display:none">
+    <button onclick="fileElem.click()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded shadow transition-colors">Select Images</button>
+  </div>
+  <div id="progress" class="text-center text-lg font-medium text-blue-700 mb-4"></div>
+  <div class="flex justify-center mb-8">
+    <a id="download-link" href="#" download="converted_images.zip" class="hidden bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded shadow transition-colors mx-auto block w-fit">Download All as ZIP</a>
+  </div>
+  <div id="download-selected-container" class="hidden flex justify-center mb-8">
+    <button id="download-selected" class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded shadow transition-colors mx-auto block w-fit">Download Selected</button>
+  </div>
+  <div class="overflow-x-auto max-w-5xl mx-auto px-2 sm:px-4 min-w-0">
+    <table id="preview-table" class="min-w-full w-full bg-white rounded shadow mb-8 text-sm sm:text-base table-auto">
+      <thead>
+        <tr class="bg-blue-100 text-blue-900">
+          <th class="py-2 px-2 sm:px-4"><input type="checkbox" id="select-all"></th>
+          <th class="py-2 px-2 sm:px-4">#</th>
+          <th class="py-2 px-2 sm:px-4">Preview</th>
+          <th class="py-2 px-2 sm:px-4">Original Filename</th>
+          <th class="py-2 px-2 sm:px-4">WebP Size</th>
+          <th class="py-2 px-2 sm:px-4">Download</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script>
+    const dropArea = document.getElementById('drop-area');
+    const fileElem = document.getElementById('fileElem');
+    const progress = document.getElementById('progress');
+    const downloadLink = document.getElementById('download-link');
+    const previewTable = document.getElementById('preview-table');
+    const previewTbody = previewTable.querySelector('tbody');
+    // Get input elements for user-configurable options
+    const maxWidthInput = document.getElementById('max-width');
+    const maxHeightInput = document.getElementById('max-height');
+    const qualityInput = document.getElementById('quality');
+
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#333';
+    });
+    dropArea.addEventListener('dragleave', e => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#888';
+    });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.style.borderColor = '#888';
+      handleFiles(e.dataTransfer.files);
+    });
+    fileElem.addEventListener('change', e => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      if (!files.length) return;
+      const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (!imageFiles.length) {
+        alert('Please select image files only.');
+        return;
+      }
+      // Read user input values, fallback to defaults if invalid
+      let maxW = parseInt(maxWidthInput.value, 10);
+      let maxH = parseInt(maxHeightInput.value, 10);
+      let quality = parseFloat(qualityInput.value);
+      if (isNaN(maxW) || maxW < 1 || maxW > 99999) maxW = 99999;
+      if (isNaN(maxH) || maxH < 1 || maxH > 99999) maxH = 9999;
+      if (isNaN(quality) || quality < 0.1 || quality > 1) quality = 0.95;
+      progress.textContent = `Processing ${imageFiles.length} image(s)...`;
+      previewTbody.innerHTML = '';
+      previewTable.classList.remove('hidden');
+      previewTable.classList.add('table');
+      processImages(imageFiles, maxW, maxH, quality);
+    }
+
+    async function processImages(files, maxW, maxH, quality) {
+      const zip = new JSZip();
+      let processed = 0;
+      // Store blobs and filenames for selected download
+      window._webpImages = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const webpBlob = await convertToWebP(file, maxW, maxH, quality);
+          const filename = file.name.replace(/\.[^.]+$/, '') + '.webp';
+          zip.file(filename, webpBlob);
+          showPreview(i + 1, file, webpBlob, filename);
+          window._webpImages.push({index: i + 1, file, webpBlob, filename});
+        } catch (err) {
+          showError(i + 1, file.name, err);
+        }
+        processed++;
+        progress.textContent = `Processed ${processed} of ${files.length} image(s).`;
+      }
+      if (files.length > 1) {
+        const zipBlob = await zip.generateAsync({type: 'blob'});
+        downloadLink.href = URL.createObjectURL(zipBlob);
+        downloadLink.style.display = 'inline-block';
+        progress.textContent = `Done! Download all converted images as ZIP below.`;
+        document.getElementById('download-selected-container').classList.remove('hidden');
+      } else {
+        downloadLink.style.display = 'none';
+        document.getElementById('download-selected-container').classList.add('hidden');
+      }
+    }
+
+    function showPreview(index, file, webpBlob, filename) {
+      const tr = document.createElement('tr');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let size = webpBlob.size;
+        let sizeStr = size < 1024*1024 ? (size/1024).toFixed(1) + ' KB' : (size/1024/1024).toFixed(2) + ' MB';
+        const downloadUrl = URL.createObjectURL(webpBlob);
+        tr.innerHTML = `
+          <td class="align-top py-2 px-2 sm:px-4"><input type="checkbox" class="select-image" data-index="${index}"></td>
+          <td class="align-top py-2 px-2 sm:px-4">${index}</td>
+          <td class="align-top py-2 px-2 sm:px-4"><img class="preview" src="${e.target.result}" alt="preview"></td>
+          <td class="align-top py-2 px-2 sm:px-4 break-words whitespace-normal max-w-[180px] sm:max-w-xs">${file.name}</td>
+          <td class="align-top py-2 px-2 sm:px-4">${sizeStr}</td>
+          <td class="align-top py-2 px-2 sm:px-4"><a href="${downloadUrl}" download="${filename}" class="download-btn text-blue-600 hover:underline">Download</a></td>
+        `;
+        previewTbody.appendChild(tr);
+      };
+      reader.readAsDataURL(webpBlob);
+    }
+
+    function showError(index, filename, err) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="align-top py-2 px-2 sm:px-4">${index}</td>
+        <td class="align-top py-2 px-2 sm:px-4" style="color:red;">Failed</td>
+        <td class="align-top py-2 px-2 sm:px-4">${filename}</td>
+        <td class="align-top py-2 px-2 sm:px-4"></td>
+        <td class="align-top py-2 px-2 sm:px-4"></td>
+      `;
+      previewTbody.appendChild(tr);
+    }
+
+    async function convertToWebP(file, maxW, maxH, quality) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+          let [w, h] = [img.width, img.height];
+          let scale = Math.min(maxW / w, maxH / h, 1);
+          let nw = Math.round(w * scale), nh = Math.round(h * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = nw;
+          canvas.height = nh;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, nw, nh);
+          canvas.toBlob(blob => {
+            if (!blob) reject(new Error('Conversion failed'));
+            else resolve(blob);
+          }, 'image/webp', quality);
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // Download selected images as ZIP
+    document.getElementById('download-selected').addEventListener('click', async function() {
+      const checkboxes = document.querySelectorAll('.select-image:checked');
+      if (!window._webpImages || checkboxes.length === 0) {
+        alert('Please select at least one image.');
+        return;
+      }
+      const zip = new JSZip();
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.getAttribute('data-index'), 10);
+        const img = window._webpImages.find(img => img.index === idx);
+        if (img) zip.file(img.filename, img.webpBlob);
+      });
+      const zipBlob = await zip.generateAsync({type: 'blob'});
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'selected_images.zip';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    });
+
+    // Select all checkbox
+    document.getElementById('select-all').addEventListener('change', function(e) {
+      const checked = e.target.checked;
+      document.querySelectorAll('.select-image').forEach(cb => {
+        cb.checked = checked;
+      });
+    });
+  </script>
+</body>
+</html>
